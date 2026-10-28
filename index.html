@@ -243,6 +243,213 @@
     100% { transform: translateY(0) scale(1, 1); }
   }
 
+  /* ---------- потайная дверь для взрослого ---------- */
+
+  .lock {
+    position: absolute;
+    top: max(10px, env(safe-area-inset-top));
+    left: max(10px, env(safe-area-inset-left));
+    width: 46px;
+    height: 46px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    -webkit-appearance: none;
+    appearance: none;
+    cursor: pointer;
+    z-index: 40;
+    opacity: 0.6;
+  }
+
+  .lock svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    transform: rotate(-90deg);
+  }
+
+  .ring-track {
+    fill: none;
+    stroke: rgba(255, 255, 255, 0.6);
+    stroke-width: 4;
+  }
+
+  .ring-fill {
+    fill: none;
+    stroke: #2f7d32;
+    stroke-width: 4;
+    stroke-linecap: round;
+    stroke-dasharray: 113.1;
+    stroke-dashoffset: 113.1;
+  }
+
+  .lock.holding .ring-fill {
+    animation: fill-ring 3s linear forwards;
+  }
+
+  @keyframes fill-ring {
+    to { stroke-dashoffset: 0; }
+  }
+
+  .lock:focus {
+    outline: none;
+  }
+
+  .lock:focus-visible {
+    outline: 3px solid #2f7d32;
+    outline-offset: 3px;
+  }
+
+  /* ---------- панель для взрослого ---------- */
+
+  .panel {
+    position: absolute;
+    inset: 0;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 3vmin;
+    background: rgba(16, 26, 38, 0.5);
+  }
+
+  .panel[hidden] {
+    display: none;
+  }
+
+  .sheet {
+    width: min(560px, 100%);
+    max-height: 100%;
+    overflow: auto;
+    padding: 22px;
+    border-radius: 22px;
+    background: #fff;
+    box-shadow: 0 18px 46px rgba(0, 0, 0, 0.28);
+    color: #22303c;
+    font-size: 17px;
+    line-height: 1.35;
+    -webkit-user-select: text;
+    user-select: text;
+    touch-action: pan-y;
+  }
+
+  .sheet h2 {
+    font-size: 21px;
+    margin-bottom: 4px;
+  }
+
+  .sheet .hint {
+    margin-bottom: 14px;
+    color: #66798a;
+    font-size: 14px;
+  }
+
+  .row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 0;
+    border-top: 1px solid #edf1f5;
+  }
+
+  .btn {
+    min-height: 48px;
+    padding: 10px 16px;
+    border: 2px solid #d7e2ea;
+    border-radius: 14px;
+    background: #f5f9fc;
+    color: #22303c;
+    font-size: 16px;
+    font-family: inherit;
+    cursor: pointer;
+  }
+
+  .btn.active {
+    border-color: #2f7d32;
+    background: #2f7d32;
+    color: #fff;
+  }
+
+  .row.stacked {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  .chips {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .wide {
+    width: 100%;
+    margin-top: 12px;
+    min-height: 54px;
+    font-size: 17px;
+  }
+
+  .danger {
+    border-color: #f0b6b6;
+    background: #fff2f2;
+    color: #b42318;
+  }
+
+  /* ---------- «пора отдохнуть» и «можно закрыть» ---------- */
+
+  .sleep {
+    position: absolute;
+    inset: 0;
+    z-index: 30;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    padding: 8vmin;
+    text-align: center;
+    color: #eaf2ff;
+    background: linear-gradient(#0d1b3d 0%, #1b2f5c 60%, #2b4472 100%);
+  }
+
+  .sleep[hidden] {
+    display: none;
+  }
+
+  .sleep h2 {
+    font-size: 26px;
+  }
+
+  .sleep p {
+    max-width: 42ch;
+    color: #b9c8e0;
+    font-size: 16px;
+    line-height: 1.45;
+  }
+
+  .moon {
+    width: 92px;
+    height: 92px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #fffdf2, #ffe9a8);
+    box-shadow: 0 0 44px rgba(255, 233, 168, 0.4);
+  }
+
+  .sleep .btn {
+    min-height: 52px;
+    margin-top: 8px;
+    padding: 10px 22px;
+    border: 2px solid rgba(255, 255, 255, 0.35);
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.12);
+    color: #eaf2ff;
+    font-size: 17px;
+    font-family: inherit;
+    cursor: pointer;
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .sun,
     .cloud {
@@ -355,12 +562,87 @@
 
 </main>
 
+<button class="lock" id="lock" type="button"
+        aria-label="Настройки для взрослого. Удержать три секунды">
+  <svg viewBox="0 0 46 46" aria-hidden="true" focusable="false">
+    <circle class="ring-track" cx="23" cy="23" r="18"></circle>
+    <circle class="ring-fill" cx="23" cy="23" r="18"></circle>
+  </svg>
+</button>
+
+<div class="panel" id="panel" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="panel-title">
+    <h2 id="panel-title">Для взрослого</h2>
+    <p class="hint">Ребёнку эта дверь не видна. Сама закроется через полминуты.</p>
+
+    <div class="row">
+      <span>Звук</span>
+      <button class="btn" id="sound-toggle" type="button" aria-pressed="true">Вкл</button>
+    </div>
+
+    <div class="row stacked">
+      <span>Время игры</span>
+      <div class="chips" id="time-chips">
+        <button class="btn" type="button" data-minutes="0">Без ограничения</button>
+        <button class="btn" type="button" data-minutes="5">5 мин</button>
+        <button class="btn" type="button" data-minutes="10">10 мин</button>
+        <button class="btn" type="button" data-minutes="15">15 мин</button>
+        <button class="btn" type="button" data-minutes="30">30 мин</button>
+      </div>
+    </div>
+
+    <button class="btn wide" id="resume" type="button">Продолжить игру</button>
+    <button class="btn wide" id="exit" type="button">Выйти из игры</button>
+  </div>
+</div>
+
+<section class="sleep" id="sleep" hidden>
+  <div class="moon" aria-hidden="true"></div>
+  <h2>Пора отдохнуть</h2>
+  <p>Время игры закончилось. Чтобы вернуться, откройте настройки для взрослого:
+     маленькая точка в левом верхнем углу, удержать три секунды.</p>
+</section>
+
+<section class="sleep" id="bye" hidden>
+  <h2>Можно закрыть вкладку</h2>
+  <p>Браузер не разрешает страничке закрыть себя самой. Закройте вкладку или
+     окно — и игра закончится.</p>
+  <button class="btn" id="bye-back" type="button">Вернуться в игру</button>
+</section>
+
+
 <script>
 (function () {
   "use strict";
 
   var buttons = Array.prototype.slice.call(document.querySelectorAll(".char"));
   var started = false;
+
+  /* ---------- 0. Настройки взрослого ---------- */
+
+  var SETTINGS_KEY = "nikolai-game:settings";
+  var settings = { sound: true, minutes: 10 };
+
+  try {
+    var saved = JSON.parse(localStorage.getItem(SETTINGS_KEY) || "null");
+    if (saved && typeof saved.sound === "boolean") {
+      settings.sound = saved.sound;
+    }
+    if (saved && typeof saved.minutes === "number") {
+      settings.minutes = saved.minutes;
+    }
+  } catch (error) {
+    // браузер не дал прочитать настройки — играем на значениях по умолчанию
+  }
+
+  function saveSettings() {
+    try {
+      localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+    } catch (error) {
+      // не сохранилось — не страшно, настройки останутся до перезагрузки
+    }
+  }
+
 
   /* ---------- 1. Звуки ---------- */
   // Всё собирается кодом прямо в браузере: ни одного звукового файла,
@@ -482,6 +764,9 @@
   var sounds = { cat: meow, bear: growl, car: honk };
 
   function playSound(name) {
+    if (!settings.sound) {
+      return;
+    }
     try {
       var ctx = audioContext();
       if (!ctx) {
@@ -533,22 +818,68 @@
   });
 
   function onTap(button) {
+    if (paused || sleeping) {
+      return;
+    }
     if (!started) {
       started = true;
       warmUp();
+      startSession();
     }
     playSound(button.getAttribute("data-sound"));
     react(button);
   }
 
-  /* ---------- 3. Первое касание: готовим экран ---------- */
+  /* ---------- 3. Сколько можно играть ---------- */
+
+  var sessionStart = 0;
+  var limitTimer = null;
+  var sleeping = false;
+  var paused = false;
+
+  function startSession() {
+    sessionStart = Date.now();
+    if (limitTimer) {
+      clearInterval(limitTimer);
+      limitTimer = null;
+    }
+    if (settings.minutes > 0) {
+      limitTimer = setInterval(checkLimit, 1000);
+    }
+  }
+
+  function checkLimit() {
+    if (sleeping || settings.minutes <= 0) {
+      return;
+    }
+    if (Date.now() - sessionStart >= settings.minutes * 60000) {
+      showSleep();
+    }
+  }
+
+  function showSleep() {
+    sleeping = true;
+    if (limitTimer) {
+      clearInterval(limitTimer);
+      limitTimer = null;
+    }
+    sleepScreen.hidden = false;
+  }
+
+  function wakeUp() {
+    sleeping = false;
+    sleepScreen.hidden = true;
+    startSession();
+  }
+
+  /* ---------- 4. Первое касание: готовим экран ---------- */
 
   function warmUp() {
     keepScreenAwake();
     goFullScreen();
   }
 
-  /* ---------- 4. Экран не гаснет, пока идёт игра ---------- */
+  /* ---------- 5. Экран не гаснет, пока идёт игра ---------- */
 
   function keepScreenAwake() {
     if (!("wakeLock" in navigator) || document.visibilityState !== "visible") {
@@ -565,7 +896,7 @@
     }
   });
 
-  /* ---------- 5. Полный экран ---------- */
+  /* ---------- 6. Полный экран ---------- */
 
   var isTouchDevice = window.matchMedia("(pointer: coarse)").matches;
 
@@ -581,13 +912,19 @@
     root.requestFullscreen({ navigationUI: "hide" }).catch(function () {});
   }
 
-  /* ---------- 6. Ребёнок не должен листать, приближать и выделять ---------- */
+  /* ---------- 7. Ребёнок не должен листать, приближать и выделять ---------- */
 
   function block(event) {
     event.preventDefault();
   }
 
-  document.addEventListener("touchmove", block, { passive: false });
+  document.addEventListener("touchmove", function (event) {
+    // в панели для взрослого список может не поместиться — там листать можно
+    if (event.target && event.target.closest && event.target.closest(".sheet")) {
+      return;
+    }
+    event.preventDefault();
+  }, { passive: false });
 
   document.addEventListener("touchstart", function (event) {
     if (event.touches.length > 1) {
@@ -601,7 +938,151 @@
   document.addEventListener("gesturestart", block, { passive: false });
   document.addEventListener("gesturechange", block, { passive: false });
 
-  /* ---------- 7. Кнопка «назад» остаётся в игре ---------- */
+  /* ---------- 8. Потайная дверь для взрослого ---------- */
+
+  var lock = document.getElementById("lock");
+  var panel = document.getElementById("panel");
+  var soundToggle = document.getElementById("sound-toggle");
+  var chips = document.getElementById("time-chips");
+  var resumeBtn = document.getElementById("resume");
+  var exitBtn = document.getElementById("exit");
+  var sleepScreen = document.getElementById("sleep");
+  var byeScreen = document.getElementById("bye");
+  var byeBack = document.getElementById("bye-back");
+  var panelTimer = null;
+  var holdTimer = null;
+  var exitArmed = false;
+
+  function openPanel() {
+    paused = true;
+    exitArmed = false;
+    panel.hidden = false;
+    refreshPanel();
+    restartPanelTimer();
+    lock.classList.remove("holding");
+  }
+
+  function closePanel() {
+    panel.hidden = true;
+    paused = false;
+    lock.classList.remove("holding");
+    if (panelTimer) {
+      clearTimeout(panelTimer);
+      panelTimer = null;
+    }
+  }
+
+  function restartPanelTimer() {
+    if (panelTimer) {
+      clearTimeout(panelTimer);
+    }
+    panelTimer = setTimeout(function () {
+      if (!panel.hidden) {
+        closePanel();
+      }
+    }, 30000);
+  }
+
+  function refreshPanel() {
+    soundToggle.textContent = settings.sound ? "Вкл" : "Выкл";
+    soundToggle.setAttribute("aria-pressed", settings.sound ? "true" : "false");
+    soundToggle.classList.toggle("active", settings.sound);
+
+    Array.prototype.forEach.call(chips.children, function (chip) {
+      var minutes = Number(chip.getAttribute("data-minutes"));
+      chip.classList.toggle("active", minutes === settings.minutes);
+    });
+
+    exitBtn.textContent = "Выйти из игры";
+    exitBtn.classList.remove("danger");
+  }
+
+  function beginHold(event) {
+    event.preventDefault();
+    lock.classList.remove("holding");
+    void lock.offsetWidth;
+    lock.classList.add("holding");
+    if (holdTimer) {
+      clearTimeout(holdTimer);
+    }
+    // ждём три секунды именно по таймеру: так надёжнее, чем ловить конец анимации
+    holdTimer = setTimeout(function () {
+      holdTimer = null;
+      lock.classList.remove("holding");
+      openPanel();
+    }, 3000);
+  }
+
+  function cancelHold() {
+    if (holdTimer) {
+      clearTimeout(holdTimer);
+      holdTimer = null;
+    }
+    if (panel.hidden) {
+      lock.classList.remove("holding");
+    }
+  }
+
+  lock.addEventListener("pointerdown", beginHold);
+  lock.addEventListener("pointerup", cancelHold);
+  lock.addEventListener("pointercancel", cancelHold);
+  lock.addEventListener("pointerleave", cancelHold);
+
+  lock.addEventListener("keydown", function (event) {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      openPanel();
+    }
+  });
+
+  panel.addEventListener("pointerdown", restartPanelTimer);
+
+  soundToggle.addEventListener("click", function () {
+    settings.sound = !settings.sound;
+    saveSettings();
+    refreshPanel();
+    restartPanelTimer();
+  });
+
+  chips.addEventListener("click", function (event) {
+    var chip = event.target.closest ? event.target.closest("[data-minutes]") : null;
+    if (!chip) {
+      return;
+    }
+    settings.minutes = Number(chip.getAttribute("data-minutes"));
+    saveSettings();
+    refreshPanel();
+    restartPanelTimer();
+    if (!sleeping) {
+      startSession();
+    }
+  });
+
+  resumeBtn.addEventListener("click", function () {
+    closePanel();
+    if (sleeping) {
+      wakeUp();
+    }
+  });
+
+  exitBtn.addEventListener("click", function () {
+    if (!exitArmed) {
+      exitArmed = true;
+      exitBtn.textContent = "Точно выйти? Нажмите ещё раз";
+      exitBtn.classList.add("danger");
+      restartPanelTimer();
+      return;
+    }
+    window.close();
+    closePanel();
+    byeScreen.hidden = false;
+  });
+
+  byeBack.addEventListener("click", function () {
+    byeScreen.hidden = true;
+  });
+
+  /* ---------- 9. Кнопка «назад» остаётся в игре ---------- */
 
   try {
     history.pushState({ game: true }, "");

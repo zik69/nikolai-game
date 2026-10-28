@@ -25,6 +25,11 @@ Online version: **https://zik69.github.io/nikolai-game/**
   with the Web Audio API.
 - **Safe for small hands.** No scrolling, no pinch zoom, no double-tap zoom,
   no long-press menu, no text to read.
+- **Parent lock.** A faint dot in the top-left corner opens after a three-second
+  hold: sound on/off, play time (5/10/15/30 minutes), exit with confirmation.
+  The panel closes itself after 30 seconds.
+- **Gentle time limit.** When the time is up, a calm night screen appears and
+  taps stop working. Only an adult can bring the game back.
 - **No ads, no tracking, no accounts.** Nothing leaves the device.
 
 ## On an iPad
@@ -44,5 +49,5 @@ Sound starts on the very first tap, which is what iOS requires.
 
 ## Roadmap in one line
 
-Done: safe full-screen frame, three big buttons, sounds. Next: a parent lock so
-a child cannot leave the game or change the volume.
+Done: safe full-screen frame, three big buttons, sounds, and a parent lock with
+a gentle time limit. Next: a final offline check.
