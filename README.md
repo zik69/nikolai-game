@@ -42,6 +42,8 @@ Online version: **https://zik69.github.io/nikolai-game/**
   the finger; only an adult can clear the canvas.
 - **Musical animals.** A fifth game: five animals sing notes from a pentatonic
   scale, so any combination sounds pleasant.
+- **Clapping.** A sixth game: two big hands clap out a calm “two claps and a
+  pause” rhythm, and a tap anywhere adds a clap.
 - **No ads, no tracking, no accounts.** Nothing leaves the device.
 - **Fullscreen button.** One tap in the parent panel hides the browser UI.
   If the browser refuses, a short card explains the two reliable ways to lock
@@ -71,4 +73,4 @@ it. For a real child lock use one of these:
 ## Roadmap in one line
 
 All P0 tasks are done, plus peekaboo, bubbles, the colour-changing sky, finger
-drawing and musical animals. Next: a big “again” button.
+drawing, musical animals and clapping. Next: big and small sorting.

@@ -215,6 +215,76 @@
     100% { transform: translateX(-50%) scale(1.5); opacity: 0; }
   }
 
+  /* ---------- ладушки ---------- */
+
+  .ladushki {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    display: none;
+    align-items: center;
+    justify-content: center;
+  }
+
+  body[data-mode="ladushki"] .ladushki {
+    display: flex;
+  }
+
+  body[data-mode="ladushki"] .stage,
+  body[data-mode="ladushki"] .bubbles {
+    display: none;
+  }
+
+  .palms {
+    position: relative;
+    width: min(74vmin, 86vw);
+    aspect-ratio: 1.55;
+  }
+
+  .palm {
+    position: absolute;
+    top: 50%;
+    width: 47%;
+    transform: translateY(-50%);
+  }
+
+  .palm-left {
+    left: 0;
+  }
+
+  .palm-right {
+    right: 0;
+  }
+
+  .palm svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    filter: drop-shadow(0 10px 16px rgba(0, 0, 0, 0.18));
+  }
+
+  .palm-right svg {
+    transform: scaleX(-1);
+  }
+
+  .palms.clap .palm-left {
+    animation: clap-left 0.3s ease-out;
+  }
+
+  .palms.clap .palm-right {
+    animation: clap-right 0.3s ease-out;
+  }
+
+  @keyframes clap-left {
+    0%, 100% { transform: translateY(-50%) translateX(0); }
+    45%      { transform: translateY(-50%) translateX(18%); }
+  }
+
+  @keyframes clap-right {
+    0%, 100% { transform: translateY(-50%) translateX(0); }
+    45%      { transform: translateY(-50%) translateX(-18%); }
+  }
+
   .sun {
     position: absolute;
     top: 6vh;
@@ -976,6 +1046,36 @@
 
 <div class="sky-tap" id="sky-tap" aria-hidden="true"></div>
 
+<main class="ladushki" id="ladushki">
+  <div class="palms" id="palms">
+    <div class="palm palm-left">
+      <svg viewBox="0 0 130 140" aria-hidden="true" focusable="false">
+        <g fill="#f7c19a">
+          <rect x="6" y="24" width="88" height="98" rx="44"></rect>
+          <rect x="62" y="14" width="60" height="24" rx="12"></rect>
+          <rect x="64" y="42" width="58" height="24" rx="12"></rect>
+          <rect x="64" y="70" width="58" height="24" rx="12"></rect>
+          <rect x="62" y="98" width="60" height="24" rx="12"></rect>
+          <rect x="10" y="96" width="56" height="24" rx="12"
+                transform="rotate(-25 38 108)"></rect>
+        </g>
+      </svg>
+    </div>
+    <div class="palm palm-right">
+      <svg viewBox="0 0 130 140" aria-hidden="true" focusable="false">
+        <g fill="#f7c19a">
+          <rect x="6" y="24" width="88" height="98" rx="44"></rect>
+          <rect x="62" y="14" width="60" height="24" rx="12"></rect>
+          <rect x="64" y="42" width="58" height="24" rx="12"></rect>
+          <rect x="64" y="70" width="58" height="24" rx="12"></rect>
+          <rect x="62" y="98" width="60" height="24" rx="12"></rect>
+          <rect x="10" y="96" width="56" height="24" rx="12"
+                transform="rotate(-25 38 108)"></rect>
+        </g>
+      </svg>
+    </div>
+  </div>
+</main>
 <canvas class="draw-layer" id="draw-layer" aria-hidden="true"></canvas>
 
 
@@ -1005,6 +1105,7 @@
         <button class="btn" type="button" data-mode="sky">Небо</button>
         <button class="btn" type="button" data-mode="draw">Рисование</button>
         <button class="btn" type="button" data-mode="music">Музыка</button>
+        <button class="btn" type="button" data-mode="ladushki">Ладушки</button>
       </div>
     </div>
 
@@ -1082,7 +1183,7 @@
     if (saved && typeof saved.minutes === "number") {
       settings.minutes = saved.minutes;
     }
-    if (saved && (saved.mode === "bubbles" || saved.mode === "animals" || saved.mode === "sky" || saved.mode === "draw" || saved.mode === "music")) {
+    if (saved && (saved.mode === "bubbles" || saved.mode === "animals" || saved.mode === "sky" || saved.mode === "draw" || saved.mode === "music" || saved.mode === "ladushki")) {
       settings.mode = saved.mode;
     }
     if (saved && typeof saved.sky === "number" && saved.sky >= 0 && saved.sky < 5) {
@@ -1096,6 +1197,13 @@
     document.body.dataset.mode = settings.mode;
     if (settings.mode === "draw" && typeof sizeCanvas === "function") {
       sizeCanvas();
+    }
+    if (typeof startClapLoop === "function") {
+      if (settings.mode === "ladushki") {
+        startClapLoop();
+      } else {
+        stopClapLoop();
+      }
     }
   }
 
@@ -1292,7 +1400,39 @@
     });
   }
 
-  var sounds = { cat: meow, bear: growl, car: honk, kuku: kuku, pop: popSound, chime: chime };
+  // «Хлоп»: короткий шумовой всплеск, мягкий и тёплый
+  var clapBuffer = null;
+
+  function clapSound(ctx) {
+    if (!clapBuffer) {
+      var length = Math.floor(ctx.sampleRate * 0.12);
+      clapBuffer = ctx.createBuffer(1, length, ctx.sampleRate);
+      var data = clapBuffer.getChannelData(0);
+      for (var i = 0; i < length; i++) {
+        data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / length, 4);
+      }
+    }
+
+    var t = ctx.currentTime;
+    [0, 0.012].forEach(function (offset, index) {
+      var src = ctx.createBufferSource();
+      var filter = ctx.createBiquadFilter();
+      var gain = ctx.createGain();
+
+      src.buffer = clapBuffer;
+      filter.type = "bandpass";
+      filter.frequency.value = index === 0 ? 1500 : 2100;
+      filter.Q.value = 0.9;
+      gain.gain.value = index === 0 ? 0.5 : 0.28;
+
+      src.connect(filter);
+      filter.connect(gain);
+      gain.connect(master);
+      src.start(t + offset);
+    });
+  }
+
+  var sounds = { cat: meow, bear: growl, car: honk, kuku: kuku, pop: popSound, chime: chime, clap: clapSound };
 
   function playSound(name) {
     if (!settings.sound) {
@@ -1676,7 +1816,69 @@
     hitKey(key);
   });
 
-  /* ---------- 7. Сколько можно играть ---------- */
+  /* ---------- 7. Ладушки ---------- */
+
+  var ladushki = document.getElementById("ladushki");
+  var palms = document.getElementById("palms");
+  var clapTimer = null;
+  var clapRunning = false;
+  var CLAP_PATTERN = [0, 480, 1600];
+  var CLAP_LOOP = 2500;
+
+  function doClap() {
+    if (paused || sleeping) {
+      return;
+    }
+    palms.classList.remove("clap");
+    void palms.offsetWidth;
+    palms.classList.add("clap");
+    playSound("clap");
+
+    window.setTimeout(function () {
+      palms.classList.remove("clap");
+    }, 320);
+  }
+
+  function scheduleClaps() {
+    CLAP_PATTERN.forEach(function (offset) {
+      window.setTimeout(function () {
+        if (clapRunning) {
+          doClap();
+        }
+      }, offset);
+    });
+  }
+
+  function startClapLoop() {
+    if (clapRunning) {
+      return;
+    }
+    clapRunning = true;
+    scheduleClaps();
+    clapTimer = window.setInterval(scheduleClaps, CLAP_LOOP);
+  }
+
+  function stopClapLoop() {
+    clapRunning = false;
+    if (clapTimer) {
+      clearInterval(clapTimer);
+      clapTimer = null;
+    }
+  }
+
+  ladushki.addEventListener("pointerdown", function () {
+    if (paused || sleeping) {
+      return;
+    }
+    if (!started) {
+      started = true;
+      warmUp();
+      startSession();
+    }
+    doClap();
+  });
+
+  /* ---------- 8. Сколько можно играть ---------- */
 
   var sessionStart = 0;
   var limitTimer = null;
@@ -1718,13 +1920,13 @@
     startSession();
   }
 
-  /* ---------- 8. Первое касание: готовим экран ---------- */
+  /* ---------- 9. Первое касание: готовим экран ---------- */
 
   function warmUp() {
     keepScreenAwake();
   }
 
-  /* ---------- 9. Экран не гаснет, пока идёт игра ---------- */
+  /* ---------- 10. Экран не гаснет, пока идёт игра ---------- */
 
   function keepScreenAwake() {
     if (!("wakeLock" in navigator) || document.visibilityState !== "visible") {
@@ -1741,7 +1943,7 @@
     }
   });
 
-  /* ---------- 10. Полный экран ---------- */
+  /* ---------- 11. Полный экран ---------- */
 
   var fsButton = document.getElementById("fullscreen");
   var fsHint = document.getElementById("fs-hint");
@@ -1831,7 +2033,7 @@
   document.addEventListener("fullscreenchange", refreshFullscreenLabel);
   document.addEventListener("webkitfullscreenchange", refreshFullscreenLabel);
 
-  /* ---------- 11. Ребёнок не должен листать, приближать и выделять ---------- */
+  /* ---------- 12. Ребёнок не должен листать, приближать и выделять ---------- */
 
   function block(event) {
     event.preventDefault();
@@ -1857,7 +2059,7 @@
   document.addEventListener("gesturestart", block, { passive: false });
   document.addEventListener("gesturechange", block, { passive: false });
 
-  /* ---------- 12. Потайная дверь для взрослого ---------- */
+  /* ---------- 13. Потайная дверь для взрослого ---------- */
 
   var lock = document.getElementById("lock");
   var panel = document.getElementById("panel");
@@ -2024,7 +2226,7 @@
     byeScreen.hidden = true;
   });
 
-  /* ---------- 13. Кнопка «назад» остаётся в игре ---------- */
+  /* ---------- 14. Кнопка «назад» остаётся в игре ---------- */
 
   // показываем выбранную игру (и готовим холст, если выбрано рисование)
   applyMode();
