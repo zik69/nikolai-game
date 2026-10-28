@@ -56,6 +56,8 @@ Online version: **https://zik69.github.io/nikolai-game/**
   with its own note and the number spoken out loud.
 - **Seasons.** A tenth game: a meadow with a tree that changes with the season —
   snow, petals, sparkles or leaves.
+- **Garage.** An eleventh game: tap and the door rolls up, the car drives out,
+  turns around and parks back inside.
 - **No ads, no tracking, no accounts.** Nothing leaves the device.
 - **Fullscreen button.** One tap in the parent panel hides the browser UI.
   If the browser refuses, a short card explains the two reliable ways to lock
@@ -84,5 +86,5 @@ it. For a real child lock use one of these:
 
 ## Roadmap in one line
 
-All P0 and P1 tasks are done, plus a gentle timer, parent voices, counting,
-falling stars and four seasons. Next: a garage for the car.
+All planned tasks are done: eleven games, a parent lock, own voices, a gentle
+timer and a fully offline single file. Next: ideas from the backlog.

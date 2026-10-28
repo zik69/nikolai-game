@@ -757,6 +757,112 @@
     100% { opacity: 0; transform: scale(2.2); }
   }
 
+  /* ---------- гараж ---------- */
+
+  .garage {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    display: none;
+    overflow: hidden;
+    touch-action: none;
+  }
+
+  body[data-mode="garage"] .garage {
+    display: block;
+  }
+
+  body[data-mode="garage"] .stage,
+  body[data-mode="garage"] .bubbles {
+    display: none;
+  }
+
+  .garage-body {
+    position: absolute;
+    left: 50%;
+    bottom: 15%;
+    width: 46vmin;
+    height: 32vmin;
+    transform: translateX(-50%);
+    background: #f3dcb6;
+    border-radius: 8px 8px 0 0;
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+    z-index: 1;
+  }
+
+  .garage-body::before {
+    content: "";
+    position: absolute;
+    left: -5%;
+    right: -5%;
+    bottom: 100%;
+    height: 34%;
+    background: #e07a5f;
+    clip-path: polygon(50% 0, 100% 100%, 0 100%);
+  }
+
+  .garage-body::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: 0;
+    width: 68%;
+    height: 74%;
+    transform: translateX(-50%);
+    background: #5a3b22;
+  }
+
+  .garage-door {
+    position: absolute;
+    left: 50%;
+    bottom: 15%;
+    width: 31.3vmin;
+    height: 23.7vmin;
+    transform: translateX(-50%);
+    background:
+      repeating-linear-gradient(
+        to bottom,
+        #8a5a35 0 2.6vmin,
+        #9a6a42 2.6vmin 3vmin
+      );
+    border-radius: 6px 6px 0 0;
+    z-index: 3;
+    transform-origin: top center;
+    transition: transform 0.35s ease;
+  }
+
+  .garage.open .garage-door {
+    transform: translateX(-50%) scaleY(0.04);
+  }
+
+  .garage-car {
+    position: absolute;
+    left: 50%;
+    bottom: 15%;
+    width: 21vmin;
+    transform: translateX(-50%);
+    z-index: 2;
+  }
+
+  .garage-car svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    filter: drop-shadow(0 8px 12px rgba(0, 0, 0, 0.18));
+  }
+
+  .garage.driving .garage-car svg {
+    animation: garage-drive 3.2s ease-in-out;
+  }
+
+  @keyframes garage-drive {
+    0%   { transform: translateX(0) scaleX(1); }
+    45%  { transform: translateX(34vw) scaleX(1); }
+    55%  { transform: translateX(34vw) scaleX(-1); }
+    96%  { transform: translateX(0) scaleX(-1); }
+    100% { transform: translateX(0) scaleX(-1); }
+  }
+
   .sun {
     position: absolute;
     top: 6vh;
@@ -1714,6 +1820,27 @@
   <div class="weather" id="weather" aria-hidden="true"></div>
 </main>
 
+<main class="garage" id="garage">
+  <div class="garage-body" aria-hidden="true"></div>
+
+  <div class="garage-car" aria-hidden="true">
+    <svg viewBox="0 0 200 120" focusable="false">
+      <circle cx="56" cy="88" r="17" fill="#2b2f3a"></circle>
+      <circle cx="56" cy="88" r="7" fill="#cfd8e6"></circle>
+      <circle cx="146" cy="88" r="17" fill="#2b2f3a"></circle>
+      <circle cx="146" cy="88" r="7" fill="#cfd8e6"></circle>
+      <path d="M62 60 L76 38 Q80 32 88 32 H120 Q128 32 133 38 L149 60 Z" fill="#ff5b5b"></path>
+      <path d="M74 55 L83 41 Q85 38 89 38 H100 V55 Z" fill="#cfeeff"></path>
+      <path d="M106 38 H119 Q123 38 125 41 L135 55 H106 Z" fill="#cfeeff"></path>
+      <rect x="14" y="54" width="176" height="34" rx="15" fill="#ff5b5b"></rect>
+      <circle cx="178" cy="68" r="5" fill="#ffe27a"></circle>
+      <rect x="120" y="66" width="12" height="4" rx="2" fill="#d64545"></rect>
+    </svg>
+  </div>
+
+  <div class="garage-door" aria-hidden="true"></div>
+</main>
+
 <canvas class="draw-layer" id="draw-layer" aria-hidden="true"></canvas>
 
 <div class="curtain" id="curtain" aria-hidden="true"></div>
@@ -1749,6 +1876,7 @@
         <button class="btn" type="button" data-mode="bedtime">Сон</button>
         <button class="btn" type="button" data-mode="count">Счёт</button>
         <button class="btn" type="button" data-mode="year">Год</button>
+        <button class="btn" type="button" data-mode="garage">Гараж</button>
       </div>
     </div>
 
@@ -1847,7 +1975,7 @@
     if (saved && typeof saved.minutes === "number") {
       settings.minutes = saved.minutes;
     }
-    if (saved && (saved.mode === "bubbles" || saved.mode === "animals" || saved.mode === "sky" || saved.mode === "draw" || saved.mode === "music" || saved.mode === "ladushki" || saved.mode === "sort" || saved.mode === "bedtime" || saved.mode === "count" || saved.mode === "year")) {
+    if (saved && (saved.mode === "bubbles" || saved.mode === "animals" || saved.mode === "sky" || saved.mode === "draw" || saved.mode === "music" || saved.mode === "ladushki" || saved.mode === "sort" || saved.mode === "bedtime" || saved.mode === "count" || saved.mode === "year" || saved.mode === "garage")) {
       settings.mode = saved.mode;
     }
     if (saved && typeof saved.sky === "number" && saved.sky >= 0 && saved.sky < 5) {
@@ -1881,6 +2009,9 @@
     }
     if (typeof applySeason === "function" && settings.mode === "year") {
       applySeason();
+    }
+    if (typeof resetGarage === "function" && settings.mode !== "garage") {
+      resetGarage();
     }
   }
 
@@ -3281,7 +3412,57 @@
     }, 950);
   });
 
-  /* ---------- 13. Сколько можно играть ---------- */
+  /* ---------- 13. Гараж ---------- */
+
+  var garage = document.getElementById("garage");
+  var garageBusy = false;
+  var garageTimers = [];
+
+  function resetGarage() {
+    garageTimers.forEach(function (timer) {
+      clearTimeout(timer);
+    });
+    garageTimers = [];
+    garage.classList.remove("open", "driving");
+    garageBusy = false;
+  }
+
+  function driveOut() {
+    if (garageBusy || paused || sleeping) {
+      return;
+    }
+    garageBusy = true;
+    garage.classList.add("open");
+    playSound("car");
+
+    garageTimers.push(window.setTimeout(function () {
+      garage.classList.add("driving");
+    }, 350));
+
+    garageTimers.push(window.setTimeout(function () {
+      garage.classList.remove("open");
+    }, 3550));
+
+    // сбрасываем уже за закрытой дверью, чтобы машинка не «щёлкала»
+    garageTimers.push(window.setTimeout(function () {
+      garage.classList.remove("driving");
+      garageBusy = false;
+    }, 4200));
+  }
+
+  garage.addEventListener("pointerdown", function () {
+    if (paused || sleeping) {
+      return;
+    }
+    if (!started) {
+      started = true;
+      warmUp();
+      startSession();
+    }
+    driveOut();
+  });
+
+  /* ---------- 14. Сколько можно играть ---------- */
 
   var sessionStart = 0;
   var limitTimer = null;
@@ -3355,13 +3536,13 @@
     applyMode();
   }
 
-  /* ---------- 14. Первое касание: готовим экран ---------- */
+  /* ---------- 15. Первое касание: готовим экран ---------- */
 
   function warmUp() {
     keepScreenAwake();
   }
 
-  /* ---------- 15. Экран не гаснет, пока идёт игра ---------- */
+  /* ---------- 16. Экран не гаснет, пока идёт игра ---------- */
 
   function keepScreenAwake() {
     if (!("wakeLock" in navigator) || document.visibilityState !== "visible") {
@@ -3378,7 +3559,7 @@
     }
   });
 
-  /* ---------- 16. Полный экран ---------- */
+  /* ---------- 17. Полный экран ---------- */
 
   var fsButton = document.getElementById("fullscreen");
   var fsHint = document.getElementById("fs-hint");
@@ -3468,7 +3649,7 @@
   document.addEventListener("fullscreenchange", refreshFullscreenLabel);
   document.addEventListener("webkitfullscreenchange", refreshFullscreenLabel);
 
-  /* ---------- 17. Ребёнок не должен листать, приближать и выделять ---------- */
+  /* ---------- 18. Ребёнок не должен листать, приближать и выделять ---------- */
 
   function block(event) {
     event.preventDefault();
@@ -3494,7 +3675,7 @@
   document.addEventListener("gesturestart", block, { passive: false });
   document.addEventListener("gesturechange", block, { passive: false });
 
-  /* ---------- 18. Потайная дверь для взрослого ---------- */
+  /* ---------- 19. Потайная дверь для взрослого ---------- */
 
   var lock = document.getElementById("lock");
   var panel = document.getElementById("panel");
@@ -3681,7 +3862,7 @@
     byeScreen.hidden = true;
   });
 
-  /* ---------- 19. Кнопка «назад» остаётся в игре ---------- */
+  /* ---------- 20. Кнопка «назад» остаётся в игре ---------- */
 
   // показываем выбранную игру (и готовим холст, если выбрано рисование)
   applyMode();
