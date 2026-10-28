@@ -36,6 +36,8 @@ Online version: **https://zik69.github.io/nikolai-game/**
 - **Bubbles.** A second game: thirteen slow bubbles float up, pop on touch with
   a soft sound and come back from the bottom. An adult switches games in the
   parent panel.
+- **Colour sky.** A third game: touch anywhere and the sky and sun fade through
+  five gentle palettes with a quiet chime.
 - **No ads, no tracking, no accounts.** Nothing leaves the device.
 
 ## On an iPad
@@ -55,5 +57,5 @@ Sound starts on the very first tap, which is what iOS requires.
 
 ## Roadmap in one line
 
-All P0 tasks are done, plus peekaboo and bubbles. Next: colour-changing sky,
-finger drawing and music.
+All P0 tasks are done, plus peekaboo, bubbles and the colour-changing sky.
+Next: finger drawing and music.

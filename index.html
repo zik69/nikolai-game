@@ -18,6 +18,7 @@
     --grass-back: #8fdd7a;
     --grass-front: #6fce5c;
     --sun: #ffd95e;
+    --sun-glow: rgba(255, 214, 92, 0.45);
     --cat: #f6a04d;
     --cat-light: #ffd9a8;
     --bear: #a9713f;
@@ -41,7 +42,7 @@
   body {
     position: fixed;
     inset: 0;
-    background: linear-gradient(var(--sky-top) 0%, #d6f0ff 55%, var(--sky-bottom) 100%);
+    background: #eafbff;
     font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
     touch-action: none;
     overscroll-behavior: none;
@@ -54,6 +55,36 @@
 
   /* ---------- небо ---------- */
 
+  .sky {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(#9fd9ff 0%, #d6f0ff 55%, #eafbff 100%);
+    transition: opacity 1.3s ease;
+  }
+
+  .sky-next {
+    opacity: 0;
+  }
+
+  .sky-tap {
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+    display: none;
+  }
+
+  body[data-mode="sky"] .sky-tap {
+    display: block;
+  }
+
+  body[data-mode="sky"] .stage {
+    display: none;
+  }
+
+  body[data-mode="sky"] .bubbles {
+    display: none;
+  }
+
   .sun {
     position: absolute;
     top: 6vh;
@@ -61,9 +92,21 @@
     width: 15vmin;
     height: 15vmin;
     border-radius: 50%;
-    background: radial-gradient(circle, #fff7c2 0%, var(--sun) 60%, #ffc93c 100%);
-    box-shadow: 0 0 12vmin rgba(255, 214, 92, 0.45);
+    background-color: var(--sun);
+    box-shadow: 0 0 12vmin var(--sun-glow);
+    transition: background-color 1.2s ease, box-shadow 1.2s ease;
     animation: sun-breathe 7s ease-in-out infinite;
+  }
+
+  .sun::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: radial-gradient(circle at 34% 32%,
+      rgba(255, 255, 255, 0.9) 0%,
+      rgba(255, 255, 255, 0.35) 30%,
+      rgba(255, 255, 255, 0) 62%);
   }
 
   @keyframes sun-breathe {
@@ -568,6 +611,9 @@
 </head>
 <body>
 
+<div class="sky" id="sky" aria-hidden="true"></div>
+<div class="sky sky-next" id="sky-next" aria-hidden="true"></div>
+
 <div class="sun" aria-hidden="true"></div>
 <div class="cloud cloud-1" aria-hidden="true"></div>
 <div class="cloud cloud-2" aria-hidden="true"></div>
@@ -669,6 +715,8 @@
 
 <div class="bubbles" id="bubbles" aria-hidden="true"></div>
 
+<div class="sky-tap" id="sky-tap" aria-hidden="true"></div>
+
 
 <button class="lock" id="lock" type="button"
         aria-label="Настройки для взрослого. Удержать три секунды">
@@ -690,9 +738,10 @@
 
     <div class="row stacked">
       <span>Что показывать</span>
-      <div class="chips two" id="mode-chips">
+      <div class="chips" id="mode-chips">
         <button class="btn" type="button" data-mode="animals">Звери</button>
         <button class="btn" type="button" data-mode="bubbles">Пузыри</button>
+        <button class="btn" type="button" data-mode="sky">Небо</button>
       </div>
     </div>
 
@@ -737,7 +786,7 @@
   /* ---------- 0. Настройки взрослого ---------- */
 
   var SETTINGS_KEY = "nikolai-game:settings";
-  var settings = { sound: true, minutes: 10, mode: "animals" };
+  var settings = { sound: true, minutes: 10, mode: "animals", sky: 0 };
 
   try {
     var saved = JSON.parse(localStorage.getItem(SETTINGS_KEY) || "null");
@@ -747,8 +796,11 @@
     if (saved && typeof saved.minutes === "number") {
       settings.minutes = saved.minutes;
     }
-    if (saved && (saved.mode === "bubbles" || saved.mode === "animals")) {
+    if (saved && (saved.mode === "bubbles" || saved.mode === "animals" || saved.mode === "sky")) {
       settings.mode = saved.mode;
+    }
+    if (saved && typeof saved.sky === "number" && saved.sky >= 0 && saved.sky < 5) {
+      settings.sky = saved.sky;
     }
   } catch (error) {
     // браузер не дал прочитать настройки — играем на значениях по умолчанию
@@ -931,7 +983,29 @@
     osc.stop(t + 0.12);
   }
 
-  var sounds = { cat: meow, bear: growl, car: honk, kuku: kuku, pop: popSound };
+  // «Динь»: тихий колокольчик из двух нот
+  function chime(ctx) {
+    var t = ctx.currentTime;
+    [660, 990].forEach(function (hz, index) {
+      var osc = ctx.createOscillator();
+      var gain = ctx.createGain();
+      var start = t + index * 0.09;
+
+      osc.type = "sine";
+      osc.frequency.value = hz;
+
+      gain.gain.setValueAtTime(0.0001, start);
+      gain.gain.exponentialRampToValueAtTime(0.09, start + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.9);
+
+      osc.connect(gain);
+      gain.connect(master);
+      osc.start(start);
+      osc.stop(start + 1);
+    });
+  }
+
+  var sounds = { cat: meow, bear: growl, car: honk, kuku: kuku, pop: popSound, chime: chime };
 
   function playSound(name) {
     if (!settings.sound) {
@@ -1087,7 +1161,70 @@
     popBubble(bubble);
   });
 
-  /* ---------- 4. Сколько можно играть ---------- */
+  /* ---------- 4. Цветное небо ---------- */
+
+  var skyLayer = document.getElementById("sky");
+  var skyNext = document.getElementById("sky-next");
+  var skyTap = document.getElementById("sky-tap");
+
+  var SKY_PALETTES = [
+    { top: "#9fd9ff", mid: "#d6f0ff", bottom: "#eafbff", sun: "#ffd95e", glow: "rgba(255, 214, 92, 0.45)" },
+    { top: "#ffb27a", mid: "#ffd2ae", bottom: "#ffe6cf", sun: "#ff9d4d", glow: "rgba(255, 150, 80, 0.45)" },
+    { top: "#ffc0da", mid: "#ffdcf0", bottom: "#fff0f6", sun: "#ff9ec6", glow: "rgba(255, 150, 200, 0.45)" },
+    { top: "#c3b4ff", mid: "#e2dbff", bottom: "#f3edff", sun: "#b79bff", glow: "rgba(170, 150, 255, 0.45)" },
+    { top: "#a9efd4", mid: "#d8fbef", bottom: "#eefff8", sun: "#8fe0bd", glow: "rgba(120, 220, 180, 0.45)" }
+  ];
+
+  function skyGradient(palette) {
+    return "linear-gradient(" + palette.top + " 0%, " + palette.mid + " 55%, " +
+      palette.bottom + " 100%)";
+  }
+
+  function paintSky(index) {
+    var palette = SKY_PALETTES[index];
+    document.documentElement.style.setProperty("--sun", palette.sun);
+    document.documentElement.style.setProperty("--sun-glow", palette.glow);
+    skyLayer.style.background = skyGradient(palette);
+  }
+
+  paintSky(settings.sky);
+
+  function nextSky() {
+    settings.sky = (settings.sky + 1) % SKY_PALETTES.length;
+    saveSettings();
+
+    var palette = SKY_PALETTES[settings.sky];
+
+    // новый градиент проявляется поверх старого, потом старый подменяется
+    skyNext.style.background = skyGradient(palette);
+    skyNext.style.opacity = "1";
+
+    document.documentElement.style.setProperty("--sun", palette.sun);
+    document.documentElement.style.setProperty("--sun-glow", palette.glow);
+    playSound("chime");
+
+    window.setTimeout(function () {
+      skyLayer.style.background = skyGradient(palette);
+      skyNext.style.transition = "none";
+      skyNext.style.opacity = "0";
+      void skyNext.offsetWidth;
+      skyNext.style.transition = "";
+    }, 1300);
+  }
+
+  skyTap.addEventListener("pointerdown", function () {
+    if (paused || sleeping) {
+      return;
+    }
+    if (!started) {
+      started = true;
+      warmUp();
+      startSession();
+    }
+    nextSky();
+  });
+
+  /* ---------- 5. Сколько можно играть ---------- */
 
   var sessionStart = 0;
   var limitTimer = null;
@@ -1129,14 +1266,14 @@
     startSession();
   }
 
-  /* ---------- 5. Первое касание: готовим экран ---------- */
+  /* ---------- 6. Первое касание: готовим экран ---------- */
 
   function warmUp() {
     keepScreenAwake();
     goFullScreen();
   }
 
-  /* ---------- 6. Экран не гаснет, пока идёт игра ---------- */
+  /* ---------- 7. Экран не гаснет, пока идёт игра ---------- */
 
   function keepScreenAwake() {
     if (!("wakeLock" in navigator) || document.visibilityState !== "visible") {
@@ -1153,7 +1290,7 @@
     }
   });
 
-  /* ---------- 7. Полный экран ---------- */
+  /* ---------- 8. Полный экран ---------- */
 
   var isTouchDevice = window.matchMedia("(pointer: coarse)").matches;
 
@@ -1169,7 +1306,7 @@
     root.requestFullscreen({ navigationUI: "hide" }).catch(function () {});
   }
 
-  /* ---------- 8. Ребёнок не должен листать, приближать и выделять ---------- */
+  /* ---------- 9. Ребёнок не должен листать, приближать и выделять ---------- */
 
   function block(event) {
     event.preventDefault();
@@ -1195,7 +1332,7 @@
   document.addEventListener("gesturestart", block, { passive: false });
   document.addEventListener("gesturechange", block, { passive: false });
 
-  /* ---------- 9. Потайная дверь для взрослого ---------- */
+  /* ---------- 10. Потайная дверь для взрослого ---------- */
 
   var lock = document.getElementById("lock");
   var panel = document.getElementById("panel");
@@ -1356,7 +1493,7 @@
     byeScreen.hidden = true;
   });
 
-  /* ---------- 10. Кнопка «назад» остаётся в игре ---------- */
+  /* ---------- 11. Кнопка «назад» остаётся в игре ---------- */
 
   try {
     history.pushState({ game: true }, "");
