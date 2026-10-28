@@ -47,7 +47,7 @@ Online version: **https://zik69.github.io/nikolai-game/**
 - **Big and small.** A seventh game: drag each bear into the matching house.
   A wrong drop simply sends the bear back — no scores, no “wrong”.
 - **Quiet night.** An eighth game: a dark sky, a sleeping bear and a soft
-  lullaby — nothing fast, nothing loud.
+  lullaby. Slow four-pointed stars drift down and melt away when you catch them.
 - **Gentle timer.** When the play time is over, the screen fades to night over
   two seconds instead of cutting off.
 - **Your own voice.** An adult can record three short clips and the animals
