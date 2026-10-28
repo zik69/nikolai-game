@@ -999,6 +999,17 @@
     display: none;
   }
 
+  /* занавес: плавно темнеет перед сном и так же плавно расходится утром */
+  .curtain {
+    position: absolute;
+    inset: 0;
+    z-index: 28;
+    background: #0b1a33;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 2.2s ease;
+  }
+
   .sleep h2 {
     font-size: 26px;
   }
@@ -1401,6 +1412,8 @@
 
 <canvas class="draw-layer" id="draw-layer" aria-hidden="true"></canvas>
 
+<div class="curtain" id="curtain" aria-hidden="true"></div>
+
 <button class="lock" id="lock" type="button"
         aria-label="Настройки для взрослого. Удержать три секунды">
   <svg viewBox="0 0 46 46" aria-hidden="true" focusable="false">
@@ -1763,7 +1776,32 @@
     });
   }
 
-  var sounds = { cat: meow, bear: growl, car: honk, kuku: kuku, pop: popSound, chime: chime, clap: clapSound };
+  // «Спокойной ночи»: две тихие нисходящие нотки
+  function goodnightSound(ctx) {
+    var t = ctx.currentTime;
+    [523.25, 392.0].forEach(function (hz, index) {
+      var start = t + index * 0.4;
+
+      [1, 0.5].forEach(function (mult, voice) {
+        var osc = ctx.createOscillator();
+        var gain = ctx.createGain();
+
+        osc.type = "sine";
+        osc.frequency.value = hz * mult;
+
+        gain.gain.setValueAtTime(0.0001, start);
+        gain.gain.linearRampToValueAtTime(voice === 0 ? 0.08 : 0.03, start + 0.06);
+        gain.gain.exponentialRampToValueAtTime(0.0001, start + 2.4);
+
+        osc.connect(gain);
+        gain.connect(master);
+        osc.start(start);
+        osc.stop(start + 2.5);
+      });
+    });
+  }
+
+  var sounds = { cat: meow, bear: growl, car: honk, kuku: kuku, pop: popSound, chime: chime, clap: clapSound, goodnight: goodnightSound };
 
   function playSound(name) {
     if (!settings.sound) {
@@ -2491,13 +2529,45 @@
       clearInterval(limitTimer);
       limitTimer = null;
     }
-    sleepScreen.hidden = false;
+    stopClapLoop();
+    stopBedtime();
+    playSound("goodnight");
+
+    // сначала плавно темнеет, и только потом появляются луна и надпись
+    curtain.style.opacity = "1";
+
+    if (sleepTimer) {
+      clearTimeout(sleepTimer);
+    }
+    sleepTimer = window.setTimeout(function () {
+      sleepTimer = null;
+      sleepScreen.hidden = false;
+      // экран уже залит ночным цветом — занавес больше не нужен
+      curtain.style.transition = "none";
+      curtain.style.opacity = "0";
+      void curtain.offsetWidth;
+      curtain.style.transition = "";
+    }, 2200);
   }
 
   function wakeUp() {
     sleeping = false;
+
+    if (sleepTimer) {
+      clearTimeout(sleepTimer);
+      sleepTimer = null;
+    }
+
+    // мгновенно закрываем занавес и плавно открываем его уже с игрой
+    curtain.style.transition = "none";
+    curtain.style.opacity = "1";
+    void curtain.offsetWidth;
+    curtain.style.transition = "";
     sleepScreen.hidden = true;
+    curtain.style.opacity = "0";
+
     startSession();
+    applyMode();
   }
 
   /* ---------- 11. Первое касание: готовим экран ---------- */
@@ -2650,6 +2720,8 @@
   var resumeBtn = document.getElementById("resume");
   var exitBtn = document.getElementById("exit");
   var sleepScreen = document.getElementById("sleep");
+  var curtain = document.getElementById("curtain");
+  var sleepTimer = null;
   var byeScreen = document.getElementById("bye");
   var byeBack = document.getElementById("bye-back");
   var panelTimer = null;

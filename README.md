@@ -48,6 +48,8 @@ Online version: **https://zik69.github.io/nikolai-game/**
   A wrong drop simply sends the bear back — no scores, no “wrong”.
 - **Quiet night.** An eighth game: a dark sky, a sleeping bear and a soft
   lullaby — nothing fast, nothing loud.
+- **Gentle timer.** When the play time is over, the screen fades to night over
+  two seconds instead of cutting off.
 - **No ads, no tracking, no accounts.** Nothing leaves the device.
 - **Fullscreen button.** One tap in the parent panel hides the browser UI.
   If the browser refuses, a short card explains the two reliable ways to lock
@@ -76,6 +78,5 @@ it. For a real child lock use one of these:
 
 ## Roadmap in one line
 
-All P0 tasks are done, plus peekaboo, bubbles, the colour-changing sky, finger
-drawing, musical animals, clapping, size sorting and a quiet bedtime screen.
-Next: a softer end-of-session timer.
+All P0 and P1 tasks are done, plus a gentle end-of-session timer. Next: a
+favourite-animal setting.
