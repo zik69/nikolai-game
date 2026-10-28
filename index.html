@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="format-detection" content="telephone=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#9fd9ff">
+<title>Кто там?</title>
+<style>
+  :root {
+    --sky-top: #9fd9ff;
+    --sky-bottom: #eafbff;
+    --grass-back: #8fdd7a;
+    --grass-front: #6fce5c;
+    --sun: #ffd95e;
+    --cat: #f6a04d;
+    --cat-light: #ffd9a8;
+    --bear: #a9713f;
+    --bear-light: #e8c49a;
+    --car-red: #ff5b5b;
+    --ink: #2b2f3a;
+  }
+
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  html,
+  body {
+    height: 100%;
+    overflow: hidden;
+  }
+
+  body {
+    position: fixed;
+    inset: 0;
+    background: linear-gradient(var(--sky-top) 0%, #d6f0ff 55%, var(--sky-bottom) 100%);
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    touch-action: none;
+    overscroll-behavior: none;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  /* ---------- небо ---------- */
+
+  .sun {
+    position: absolute;
+    top: 6vh;
+    right: 8vw;
+    width: 15vmin;
+    height: 15vmin;
+    border-radius: 50%;
+    background: radial-gradient(circle, #fff7c2 0%, var(--sun) 60%, #ffc93c 100%);
+    box-shadow: 0 0 12vmin rgba(255, 214, 92, 0.45);
+    animation: sun-breathe 7s ease-in-out infinite;
+  }
+
+  @keyframes sun-breathe {
+    0%, 100% { transform: scale(1); }
+    50%      { transform: scale(1.06); }
+  }
+
+  .cloud {
+    position: absolute;
+    background: #fff;
+    border-radius: 999px;
+    opacity: 0.92;
+  }
+
+  .cloud::before,
+  .cloud::after {
+    content: "";
+    position: absolute;
+    background: #fff;
+    border-radius: 50%;
+  }
+
+  .cloud-1 {
+    width: 34vw;
+    height: 10vw;
+    top: 12vh;
+    left: -45vw;
+    animation: drift 38s linear infinite;
+  }
+  .cloud-1::before {
+    width: 14vw;
+    height: 14vw;
+    left: 14%;
+    top: -48%;
+  }
+  .cloud-1::after {
+    width: 10vw;
+    height: 10vw;
+    right: 14%;
+    top: -30%;
+  }
+
+  .cloud-2 {
+    width: 26vw;
+    height: 8vw;
+    top: 24vh;
+    left: -35vw;
+    opacity: 0.75;
+    animation: drift 54s linear infinite;
+    animation-delay: -18s;
+  }
+  .cloud-2::before {
+    width: 11vw;
+    height: 11vw;
+    left: 18%;
+    top: -46%;
+  }
+  .cloud-2::after {
+    width: 8vw;
+    height: 8vw;
+    right: 16%;
+    top: -28%;
+  }
+
+  @keyframes drift {
+    from { transform: translateX(0); }
+    to   { transform: translateX(150vw); }
+  }
+
+  /* ---------- луг ---------- */
+
+  .hill {
+    position: absolute;
+    left: -10%;
+    right: -10%;
+    bottom: 0;
+    height: 40vh;
+    background: var(--grass-front);
+    border-radius: 50% 50% 0 0 / 18% 18% 0 0;
+  }
+
+  .hill::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: -6vh;
+    height: 16vh;
+    background: var(--grass-back);
+    border-radius: 50% 50% 0 0 / 60% 60% 0 0;
+    opacity: 0.75;
+  }
+
+  /* ---------- кнопки-персонажи ---------- */
+
+  .stage {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-rows: minmax(0, 1fr);
+    gap: 2vmin;
+    padding:
+      max(4vh, env(safe-area-inset-top))
+      max(5vw, env(safe-area-inset-right))
+      max(9vh, env(safe-area-inset-bottom))
+      max(5vw, env(safe-area-inset-left));
+    align-items: end;
+  }
+
+  /* на телефоне столбиком — так кнопки крупнее */
+  @media (orientation: portrait) {
+    .stage {
+      grid-template-columns: 1fr;
+      grid-template-rows: repeat(3, minmax(0, 1fr));
+      gap: 1vmin;
+      padding-left: max(12vw, env(safe-area-inset-left));
+      padding-right: max(12vw, env(safe-area-inset-right));
+    }
+  }
+
+  .char {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    min-width: 0;
+    min-height: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+    -webkit-appearance: none;
+    appearance: none;
+    isolation: isolate;
+  }
+
+  .char:focus {
+    outline: none;
+  }
+
+  .char:focus-visible {
+    outline: 5px solid rgba(255, 255, 255, 0.95);
+    outline-offset: -8px;
+    border-radius: 32px;
+  }
+
+  /* мягкое свечение под каждым — приглашение нажать, без текста */
+  .char::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: 2%;
+    width: 70%;
+    height: 12%;
+    transform: translateX(-50%);
+    border-radius: 50%;
+    background: radial-gradient(ellipse, rgba(255, 255, 255, 0.32) 0%, rgba(255, 255, 255, 0) 70%);
+    z-index: -1;
+  }
+
+  .char svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    filter: drop-shadow(0 8px 12px rgba(0, 0, 0, 0.16));
+  }
+
+  .char.tap svg {
+    animation: hop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  @keyframes hop {
+    0%   { transform: translateY(0) scale(1, 1); }
+    30%  { transform: translateY(-9%) scale(0.96, 1.06); }
+    60%  { transform: translateY(0) scale(1.06, 0.94); }
+    80%  { transform: translateY(-2%) scale(0.99, 1.01); }
+    100% { transform: translateY(0) scale(1, 1); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .sun,
+    .cloud {
+      animation: none;
+    }
+    .char.tap svg {
+      animation-duration: 0.2s;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="sun" aria-hidden="true"></div>
+<div class="cloud cloud-1" aria-hidden="true"></div>
+<div class="cloud cloud-2" aria-hidden="true"></div>
+<div class="hill" aria-hidden="true"></div>
+
+<main class="stage">
+
+  <!-- Кошка -->
+  <button class="char" type="button" data-sound="cat" aria-label="Кошка">
+    <svg viewBox="0 0 140 150" preserveAspectRatio="xMidYMax meet" aria-hidden="true" focusable="false">
+      <!-- хвост -->
+      <path d="M104 120 C140 120 140 76 116 72" fill="none" stroke="var(--cat)"
+            stroke-width="13" stroke-linecap="round"></path>
+      <!-- туловище -->
+      <ellipse cx="70" cy="112" rx="40" ry="35" fill="var(--cat)"></ellipse>
+      <ellipse cx="70" cy="122" rx="23" ry="21" fill="var(--cat-light)"></ellipse>
+      <!-- лапы -->
+      <ellipse cx="50" cy="141" rx="15" ry="9" fill="var(--cat-light)"></ellipse>
+      <ellipse cx="90" cy="141" rx="15" ry="9" fill="var(--cat-light)"></ellipse>
+      <!-- уши -->
+      <path d="M40 44 L44 14 L70 33 Z" fill="var(--cat)"></path>
+      <path d="M100 44 L96 14 L70 33 Z" fill="var(--cat)"></path>
+      <path d="M48 39 L50 24 L62 34 Z" fill="#ff9db5"></path>
+      <path d="M92 39 L90 24 L78 34 Z" fill="#ff9db5"></path>
+      <!-- голова -->
+      <circle cx="70" cy="64" r="34" fill="var(--cat)"></circle>
+      <!-- глаза -->
+      <ellipse cx="57" cy="60" rx="6" ry="7.5" fill="var(--ink)"></ellipse>
+      <ellipse cx="83" cy="60" rx="6" ry="7.5" fill="var(--ink)"></ellipse>
+      <circle cx="59" cy="57" r="2.2" fill="#fff"></circle>
+      <circle cx="85" cy="57" r="2.2" fill="#fff"></circle>
+      <!-- нос и рот -->
+      <path d="M65 73 H75 L70 79 Z" fill="#ff7f9a"></path>
+      <path d="M70 79 v4 M70 83 q-5 4 -9 0 M70 83 q5 4 9 0"
+            fill="none" stroke="#c96a35" stroke-width="2.2" stroke-linecap="round"></path>
+      <!-- усы -->
+      <path d="M26 70 H45 M26 80 H45 M114 70 H95 M114 80 H95"
+            stroke="#fff" stroke-width="2.6" stroke-linecap="round" opacity="0.95"></path>
+    </svg>
+  </button>
+
+  <!-- Мишка -->
+  <button class="char" type="button" data-sound="bear" aria-label="Мишка">
+    <svg viewBox="0 0 150 150" preserveAspectRatio="xMidYMax meet" aria-hidden="true" focusable="false">
+      <!-- лапы -->
+      <ellipse cx="52" cy="141" rx="17" ry="9" fill="#8a5a35"></ellipse>
+      <ellipse cx="98" cy="141" rx="17" ry="9" fill="#8a5a35"></ellipse>
+      <!-- туловище -->
+      <ellipse cx="75" cy="112" rx="42" ry="36" fill="var(--bear)"></ellipse>
+      <ellipse cx="75" cy="121" rx="26" ry="24" fill="var(--bear-light)"></ellipse>
+      <!-- уши -->
+      <circle cx="38" cy="34" r="16" fill="var(--bear)"></circle>
+      <circle cx="112" cy="34" r="16" fill="var(--bear)"></circle>
+      <circle cx="38" cy="34" r="8" fill="var(--bear-light)"></circle>
+      <circle cx="112" cy="34" r="8" fill="var(--bear-light)"></circle>
+      <!-- голова -->
+      <circle cx="75" cy="64" r="38" fill="var(--bear)"></circle>
+      <!-- морда -->
+      <ellipse cx="75" cy="83" rx="22" ry="16" fill="var(--bear-light)"></ellipse>
+      <ellipse cx="75" cy="76" rx="7" ry="5" fill="#3a2a20"></ellipse>
+      <path d="M75 81 v4 M75 85 q-6 5 -11 0 M75 85 q6 5 11 0"
+            fill="none" stroke="#3a2a20" stroke-width="2.2" stroke-linecap="round"></path>
+      <!-- глаза -->
+      <circle cx="60" cy="57" r="5.5" fill="var(--ink)"></circle>
+      <circle cx="90" cy="57" r="5.5" fill="var(--ink)"></circle>
+      <circle cx="61.5" cy="55" r="2" fill="#fff"></circle>
+      <circle cx="91.5" cy="55" r="2" fill="#fff"></circle>
+    </svg>
+  </button>
+
+  <!-- Машинка -->
+  <button class="char" type="button" data-sound="car" aria-label="Машинка">
+    <svg viewBox="0 0 200 120" preserveAspectRatio="xMidYMax meet" aria-hidden="true" focusable="false">
+      <!-- колёса -->
+      <g class="wheel">
+        <circle cx="56" cy="88" r="17" fill="var(--ink)"></circle>
+        <circle cx="56" cy="88" r="7" fill="#cfd8e6"></circle>
+        <circle cx="56" cy="83" r="2" fill="#9aa6b8"></circle>
+      </g>
+      <g class="wheel">
+        <circle cx="146" cy="88" r="17" fill="var(--ink)"></circle>
+        <circle cx="146" cy="88" r="7" fill="#cfd8e6"></circle>
+        <circle cx="146" cy="83" r="2" fill="#9aa6b8"></circle>
+      </g>
+      <!-- крыша и окна -->
+      <path d="M62 60 L76 38 Q80 32 88 32 H120 Q128 32 133 38 L149 60 Z"
+            fill="var(--car-red)"></path>
+      <path d="M74 55 L83 41 Q85 38 89 38 H100 V55 Z" fill="#cfeeff"></path>
+      <path d="M106 38 H119 Q123 38 125 41 L135 55 H106 Z" fill="#cfeeff"></path>
+      <!-- кузов -->
+      <rect x="14" y="54" width="176" height="34" rx="15" fill="var(--car-red)"></rect>
+      <!-- фара и ручка -->
+      <circle cx="178" cy="68" r="5" fill="#ffe27a"></circle>
+      <rect x="120" y="66" width="12" height="4" rx="2" fill="#d64545"></rect>
+    </svg>
+  </button>
+
+</main>
+
+<script>
+(function () {
+  "use strict";
+
+  var buttons = Array.prototype.slice.call(document.querySelectorAll(".char"));
+  var started = false;
+
+  /* ---------- 1. Звуки ---------- */
+  // Всё собирается кодом прямо в браузере: ни одного звукового файла,
+  // ни одной ссылки в интернет.
+
+  var audio = null;
+  var master = null;
+
+  function audioContext() {
+    var Ctx = window.AudioContext || window.webkitAudioContext;
+    if (!Ctx) {
+      return null;
+    }
+    if (!audio) {
+      audio = new Ctx();
+      master = audio.createGain();
+      master.gain.value = 0.9;
+      master.connect(audio.destination);
+    }
+    // на iPad и iPhone звук «просыпается» только от касания
+    if (audio.state === "suspended" && audio.resume) {
+      audio.resume();
+    }
+    return audio;
+  }
+
+  // «Мяу»: голос с горкой вверх и вниз, как у кошки
+  function meow(ctx) {
+    var t = ctx.currentTime;
+    var osc = ctx.createOscillator();
+    var filter = ctx.createBiquadFilter();
+    var gain = ctx.createGain();
+
+    osc.type = "sawtooth";
+    osc.frequency.setValueAtTime(560, t);
+    osc.frequency.exponentialRampToValueAtTime(880, t + 0.10);
+    osc.frequency.exponentialRampToValueAtTime(540, t + 0.34);
+
+    filter.type = "lowpass";
+    filter.frequency.setValueAtTime(1100, t);
+    filter.frequency.linearRampToValueAtTime(2400, t + 0.12);
+    filter.frequency.linearRampToValueAtTime(900, t + 0.36);
+    filter.Q.value = 4;
+
+    gain.gain.setValueAtTime(0.0001, t);
+    gain.gain.exponentialRampToValueAtTime(0.18, t + 0.05);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.42);
+
+    osc.connect(filter);
+    filter.connect(gain);
+    gain.connect(master);
+    osc.start(t);
+    osc.stop(t + 0.45);
+  }
+
+  // «Р-р-р»: низкий голос с лёгким дрожанием
+  function growl(ctx) {
+    var t = ctx.currentTime;
+    var osc = ctx.createOscillator();
+    var lfo = ctx.createOscillator();
+    var lfoGain = ctx.createGain();
+    var filter = ctx.createBiquadFilter();
+    var gain = ctx.createGain();
+
+    osc.type = "sawtooth";
+    osc.frequency.setValueAtTime(120, t);
+    osc.frequency.exponentialRampToValueAtTime(78, t + 0.5);
+
+    lfo.type = "sine";
+    lfo.frequency.value = 24;
+    lfoGain.gain.value = 12;
+    lfo.connect(lfoGain);
+    lfoGain.connect(osc.frequency);
+
+    filter.type = "lowpass";
+    filter.frequency.value = 520;
+    filter.Q.value = 2;
+
+    gain.gain.setValueAtTime(0.0001, t);
+    gain.gain.exponentialRampToValueAtTime(0.22, t + 0.06);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.55);
+
+    osc.connect(filter);
+    filter.connect(gain);
+    gain.connect(master);
+    osc.start(t);
+    osc.stop(t + 0.6);
+    lfo.start(t);
+    lfo.stop(t + 0.6);
+  }
+
+  // «Би-бип»: две ноты вместе, как у настоящей машинки
+  function honk(ctx) {
+    var t = ctx.currentTime;
+    [392, 466].forEach(function (hz) {
+      var osc = ctx.createOscillator();
+      var filter = ctx.createBiquadFilter();
+      var gain = ctx.createGain();
+
+      osc.type = "square";
+      osc.frequency.value = hz;
+
+      filter.type = "lowpass";
+      filter.frequency.value = 2600;
+
+      gain.gain.setValueAtTime(0.0001, t);
+      gain.gain.exponentialRampToValueAtTime(0.075, t + 0.015);
+      gain.gain.setValueAtTime(0.075, t + 0.15);
+      gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.28);
+
+      osc.connect(filter);
+      filter.connect(gain);
+      gain.connect(master);
+      osc.start(t);
+      osc.stop(t + 0.3);
+    });
+  }
+
+  var sounds = { cat: meow, bear: growl, car: honk };
+
+  function playSound(name) {
+    try {
+      var ctx = audioContext();
+      if (!ctx) {
+        return;
+      }
+      var sound = sounds[name];
+      if (sound) {
+        sound(ctx);
+      }
+    } catch (error) {
+      // если браузер не дал звук — игра продолжается без него
+    }
+  }
+
+  /* ---------- 2. Нажатие на персонажа ---------- */
+
+  function react(button) {
+    // снимаем и снова ставим класс, чтобы анимация запускалась каждый раз
+    button.classList.remove("tap");
+    void button.offsetWidth;
+    button.classList.add("tap");
+  }
+
+  buttons.forEach(function (button) {
+    button.addEventListener("animationend", function () {
+      button.classList.remove("tap");
+    });
+
+    if (window.PointerEvent) {
+      button.addEventListener("pointerdown", function () {
+        onTap(button);
+      }, { passive: true });
+    } else {
+      button.addEventListener("touchstart", function () {
+        onTap(button);
+      }, { passive: true });
+      button.addEventListener("mousedown", function () {
+        onTap(button);
+      }, { passive: true });
+    }
+
+    // для клавиатуры: пробел и Enter
+    button.addEventListener("keydown", function (event) {
+      if (event.key === " " || event.key === "Enter") {
+        event.preventDefault();
+        onTap(button);
+      }
+    });
+  });
+
+  function onTap(button) {
+    if (!started) {
+      started = true;
+      warmUp();
+    }
+    playSound(button.getAttribute("data-sound"));
+    react(button);
+  }
+
+  /* ---------- 3. Первое касание: готовим экран ---------- */
+
+  function warmUp() {
+    keepScreenAwake();
+    goFullScreen();
+  }
+
+  /* ---------- 4. Экран не гаснет, пока идёт игра ---------- */
+
+  function keepScreenAwake() {
+    if (!("wakeLock" in navigator) || document.visibilityState !== "visible") {
+      return;
+    }
+    navigator.wakeLock.request("screen").catch(function () {
+      // браузер не разрешил — просто работаем дальше
+    });
+  }
+
+  document.addEventListener("visibilitychange", function () {
+    if (document.visibilityState === "visible" && started) {
+      keepScreenAwake();
+    }
+  });
+
+  /* ---------- 5. Полный экран ---------- */
+
+  var isTouchDevice = window.matchMedia("(pointer: coarse)").matches;
+
+  function goFullScreen() {
+    if (!isTouchDevice) {
+      return;
+    }
+    var root = document.documentElement;
+    // в Safari на iPad и iPhone такого способа нет — проверяем и молча идём дальше
+    if (document.fullscreenElement || typeof root.requestFullscreen !== "function") {
+      return;
+    }
+    root.requestFullscreen({ navigationUI: "hide" }).catch(function () {});
+  }
+
+  /* ---------- 6. Ребёнок не должен листать, приближать и выделять ---------- */
+
+  function block(event) {
+    event.preventDefault();
+  }
+
+  document.addEventListener("touchmove", block, { passive: false });
+
+  document.addEventListener("touchstart", function (event) {
+    if (event.touches.length > 1) {
+      event.preventDefault();
+    }
+  }, { passive: false });
+
+  document.addEventListener("dblclick", block, { passive: false });
+  document.addEventListener("contextmenu", block);
+  document.addEventListener("dragstart", block);
+  document.addEventListener("gesturestart", block, { passive: false });
+  document.addEventListener("gesturechange", block, { passive: false });
+
+  /* ---------- 7. Кнопка «назад» остаётся в игре ---------- */
+
+  try {
+    history.pushState({ game: true }, "");
+    window.addEventListener("popstate", function () {
+      history.pushState({ game: true }, "");
+    });
+  } catch (error) {
+    // если браузер не разрешает — ничего страшного
+  }
+})();
+</script>
+</body>
+</html>
