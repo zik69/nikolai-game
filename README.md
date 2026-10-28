@@ -16,7 +16,8 @@ Online version: **https://zik69.github.io/nikolai-game/**
 
 - **One file.** Everything — pictures, sounds, code — lives in `index.html`.
 - **Works offline.** There is not a single link to the internet, so nothing can
-  fail to load.
+  fail to load. A strict Content-Security-Policy stops the page from making any
+  network request at all, even by accident.
 - **Big targets.** A button is a whole grid cell. On a 320 px phone the
   smallest one is still 243 × 163 px.
 - **Two layouts.** Landscape keeps the three characters in a row; portrait
@@ -49,5 +50,6 @@ Sound starts on the very first tap, which is what iOS requires.
 
 ## Roadmap in one line
 
-Done: safe full-screen frame, three big buttons, sounds, and a parent lock with
-a gentle time limit. Next: a final offline check.
+All P0 tasks are done: safe full-screen frame, three big buttons, sounds, a
+parent lock with a gentle time limit, and a fully offline single file. Next:
+the fun part — peekaboo, bubbles, music.
