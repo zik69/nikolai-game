@@ -878,7 +878,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 3vmin;
+    padding: 2vmin;
     background: rgba(16, 26, 38, 0.5);
   }
 
@@ -890,7 +890,7 @@
     width: min(560px, 100%);
     max-height: 100%;
     overflow: auto;
-    padding: 22px;
+    padding: 18px;
     border-radius: 22px;
     background: #fff;
     box-shadow: 0 18px 46px rgba(0, 0, 0, 0.28);
@@ -908,7 +908,7 @@
   }
 
   .sheet .hint {
-    margin-bottom: 14px;
+    margin-bottom: 8px;
     color: #66798a;
     font-size: 14px;
   }
@@ -918,7 +918,7 @@
     align-items: center;
     justify-content: space-between;
     gap: 12px;
-    padding: 10px 0;
+    padding: 8px 0;
     border-top: 1px solid #edf1f5;
   }
 
@@ -965,10 +965,36 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .btn.has-voice {
+    border-color: #2f7d32;
+    background: #eaf7ea;
+  }
+  @media (min-width: 640px) {
+    #mode-chips,
+    #voice-chips {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    #time-chips {
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+    }
+  }
+
+  .btn.recording {
+    border-color: #e07a5f;
+    background: #fff2ee;
+    animation: rec-blink 1s ease-in-out infinite;
+  }
+
+  @keyframes rec-blink {
+    0%, 100% { opacity: 1; }
+    50%      { opacity: 0.6; }
+  }
+
   .wide {
     width: 100%;
-    margin-top: 12px;
-    min-height: 54px;
+    margin-top: 8px;
+    min-height: 46px;
     font-size: 17px;
   }
 
@@ -1446,18 +1472,29 @@
       </div>
     </div>
 
-    <button class="btn wide" id="clear-draw" type="button">Стереть рисунок</button>
-
     <div class="row stacked">
       <span>Время игры</span>
       <div class="chips" id="time-chips">
-        <button class="btn" type="button" data-minutes="0">Без ограничения</button>
+        <button class="btn" type="button" data-minutes="0">Без лимита</button>
         <button class="btn" type="button" data-minutes="5">5 мин</button>
         <button class="btn" type="button" data-minutes="10">10 мин</button>
         <button class="btn" type="button" data-minutes="15">15 мин</button>
         <button class="btn" type="button" data-minutes="30">30 мин</button>
       </div>
     </div>
+
+    <div class="row stacked">
+      <span>Свой голос</span>
+      <div class="chips two" id="voice-chips">
+        <button class="btn" type="button" data-voice="cat">Кошка</button>
+        <button class="btn" type="button" data-voice="bear">Мишка</button>
+        <button class="btn" type="button" data-voice="car">Машинка</button>
+        <button class="btn" type="button" id="voice-clear">Стереть все</button>
+      </div>
+      <p class="hint" id="voice-status">Три секунды записи. Голос останется на этом устройстве.</p>
+    </div>
+
+    <button class="btn wide" id="clear-draw" type="button">Стереть рисунок</button>
 
     <button class="btn wide" id="fullscreen" type="button">Во весь экран</button>
 
@@ -1880,7 +1917,10 @@
       startSession();
     }
     if (startPeekaboo(button)) {
-      playSound(button.getAttribute("data-sound"));
+      var soundName = button.getAttribute("data-sound");
+      if (settings.sound && !playAnimalVoice(soundName)) {
+        playSound(soundName);
+      }
     }
   }
 
@@ -2496,7 +2536,224 @@
     }, 1700);
   });
 
-  /* ---------- 10. Сколько можно играть ---------- */
+  /* ---------- 10. Голоса родителей ---------- */
+
+  var VOICES_KEY = "nikolai-game:voices";
+  var VOICE_NAMES = { cat: "кошка", bear: "мишка", car: "машинка" };
+  var voiceChips = document.getElementById("voice-chips");
+  var voiceStatus = document.getElementById("voice-status");
+  var voiceClear = document.getElementById("voice-clear");
+  var voiceData = {};
+  var voiceBuffers = {};
+  var recorder = null;
+  var recordTimer = null;
+  var recordAnimal = null;
+
+  function setVoiceStatus(text) {
+    if (voiceStatus) {
+      voiceStatus.textContent = text;
+    }
+  }
+
+  function toBase64(buffer) {
+    var bytes = new Uint8Array(buffer);
+    var binary = "";
+    for (var i = 0; i < bytes.length; i++) {
+      binary += String.fromCharCode(bytes[i]);
+    }
+    return btoa(binary);
+  }
+
+  function fromBase64(base64) {
+    var binary = atob(base64);
+    var bytes = new Uint8Array(binary.length);
+    for (var i = 0; i < binary.length; i++) {
+      bytes[i] = binary.charCodeAt(i);
+    }
+    return bytes.buffer;
+  }
+
+  function decodeVoice(name, buffer) {
+    try {
+      var ctx = audioContext();
+      if (!ctx) {
+        return;
+      }
+      ctx.decodeAudioData(buffer, function (decoded) {
+        voiceBuffers[name] = decoded;
+      }, function () {
+        // не получилось — останется обычный звук
+      });
+    } catch (error) {
+      // тихо идём дальше
+    }
+  }
+
+  function saveVoices() {
+    try {
+      localStorage.setItem(VOICES_KEY, JSON.stringify(voiceData));
+      return true;
+    } catch (error) {
+      setVoiceStatus("Запись не сохранилась: в браузере закончилось место.");
+      return false;
+    }
+  }
+
+  function markVoice(name, on) {
+    var chip = voiceChips ? voiceChips.querySelector('[data-voice="' + name + '"]') : null;
+    if (chip) {
+      chip.classList.toggle("has-voice", on);
+    }
+  }
+
+  function markRecording(name, on) {
+    var chip = voiceChips ? voiceChips.querySelector('[data-voice="' + name + '"]') : null;
+    if (chip) {
+      chip.classList.toggle("recording", on);
+    }
+  }
+
+  function loadVoices() {
+    try {
+      var saved = JSON.parse(localStorage.getItem(VOICES_KEY) || "null");
+      if (!saved) {
+        return;
+      }
+      Object.keys(saved).forEach(function (name) {
+        voiceData[name] = saved[name];
+        decodeVoice(name, fromBase64(saved[name]));
+        markVoice(name, true);
+      });
+    } catch (error) {
+      // нет сохранённых голосов — играем обычные звуки
+    }
+  }
+
+  function stopRecording() {
+    if (recordTimer) {
+      clearTimeout(recordTimer);
+      recordTimer = null;
+    }
+    if (recorder && recorder.state === "recording") {
+      recorder.stop();
+    }
+  }
+
+  function finishRecording(name, blob) {
+    markRecording(name, false);
+
+    var reader = new FileReader();
+    reader.onload = function () {
+      voiceData[name] = toBase64(reader.result);
+      decodeVoice(name, reader.result);
+      markVoice(name, true);
+      if (saveVoices()) {
+        setVoiceStatus("Готово: теперь " + VOICE_NAMES[name] + " звучит вашим голосом.");
+      }
+    };
+    reader.readAsArrayBuffer(blob);
+  }
+
+  function startRecording(name) {
+    if (recorder) {
+      stopRecording();
+      return;
+    }
+
+    var canRecord = navigator.mediaDevices &&
+      navigator.mediaDevices.getUserMedia &&
+      typeof MediaRecorder !== "undefined";
+
+    if (!canRecord) {
+      setVoiceStatus("Этот браузер не умеет записывать звук. Откройте игру " +
+        "по ссылке https — там запись работает.");
+      return;
+    }
+
+    navigator.mediaDevices.getUserMedia({ audio: true }).then(function (stream) {
+      recordAnimal = name;
+      recorder = new MediaRecorder(stream);
+      var chunks = [];
+
+      recorder.ondataavailable = function (event) {
+        if (event.data && event.data.size) {
+          chunks.push(event.data);
+        }
+      };
+
+      recorder.onstop = function () {
+        stream.getTracks().forEach(function (track) {
+          track.stop();
+        });
+        recorder = null;
+        recordAnimal = null;
+        var blob = new Blob(chunks, { type: "audio/webm" });
+        finishRecording(name, blob);
+      };
+
+      recorder.start();
+      markRecording(name, true);
+      setVoiceStatus("Говорите… запись остановится сама через три секунды.");
+
+      recordTimer = window.setTimeout(stopRecording, 3000);
+    }).catch(function () {
+      setVoiceStatus("Микрофон не разрешён. Разрешите его в настройках браузера " +
+        "и нажмите снова.");
+    });
+  }
+
+  function playAnimalVoice(name) {
+    var buffer = voiceBuffers[name];
+    if (!buffer) {
+      return false;
+    }
+    try {
+      var ctx = audioContext();
+      var source = ctx.createBufferSource();
+      var gain = ctx.createGain();
+      source.buffer = buffer;
+      gain.gain.value = 0.9;
+      source.connect(gain);
+      gain.connect(master);
+      source.start(0);
+      return true;
+    } catch (error) {
+      return false;
+    }
+  }
+
+  if (voiceChips) {
+    voiceChips.addEventListener("click", function (event) {
+      var chip = event.target.closest ? event.target.closest("[data-voice]") : null;
+      if (!chip) {
+        return;
+      }
+      var name = chip.getAttribute("data-voice");
+      if (recorder) {
+        stopRecording();
+      } else {
+        startRecording(name);
+      }
+      restartPanelTimer();
+    });
+  }
+
+  if (voiceClear) {
+    voiceClear.addEventListener("click", function () {
+      voiceData = {};
+      voiceBuffers = {};
+      saveVoices();
+      Array.prototype.forEach.call(voiceChips.querySelectorAll("[data-voice]"), function (chip) {
+        chip.classList.remove("has-voice");
+      });
+      setVoiceStatus("Записи стёрты. Звери снова звучат как раньше.");
+      restartPanelTimer();
+    });
+  }
+
+  loadVoices();
+
+  /* ---------- 11. Сколько можно играть ---------- */
 
   var sessionStart = 0;
   var limitTimer = null;
@@ -2570,13 +2827,13 @@
     applyMode();
   }
 
-  /* ---------- 11. Первое касание: готовим экран ---------- */
+  /* ---------- 12. Первое касание: готовим экран ---------- */
 
   function warmUp() {
     keepScreenAwake();
   }
 
-  /* ---------- 12. Экран не гаснет, пока идёт игра ---------- */
+  /* ---------- 13. Экран не гаснет, пока идёт игра ---------- */
 
   function keepScreenAwake() {
     if (!("wakeLock" in navigator) || document.visibilityState !== "visible") {
@@ -2593,7 +2850,7 @@
     }
   });
 
-  /* ---------- 13. Полный экран ---------- */
+  /* ---------- 14. Полный экран ---------- */
 
   var fsButton = document.getElementById("fullscreen");
   var fsHint = document.getElementById("fs-hint");
@@ -2683,7 +2940,7 @@
   document.addEventListener("fullscreenchange", refreshFullscreenLabel);
   document.addEventListener("webkitfullscreenchange", refreshFullscreenLabel);
 
-  /* ---------- 14. Ребёнок не должен листать, приближать и выделять ---------- */
+  /* ---------- 15. Ребёнок не должен листать, приближать и выделять ---------- */
 
   function block(event) {
     event.preventDefault();
@@ -2709,7 +2966,7 @@
   document.addEventListener("gesturestart", block, { passive: false });
   document.addEventListener("gesturechange", block, { passive: false });
 
-  /* ---------- 15. Потайная дверь для взрослого ---------- */
+  /* ---------- 16. Потайная дверь для взрослого ---------- */
 
   var lock = document.getElementById("lock");
   var panel = document.getElementById("panel");
@@ -2878,7 +3135,7 @@
     byeScreen.hidden = true;
   });
 
-  /* ---------- 16. Кнопка «назад» остаётся в игре ---------- */
+  /* ---------- 17. Кнопка «назад» остаётся в игре ---------- */
 
   // показываем выбранную игру (и готовим холст, если выбрано рисование)
   applyMode();

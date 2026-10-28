@@ -50,6 +50,8 @@ Online version: **https://zik69.github.io/nikolai-game/**
   lullaby — nothing fast, nothing loud.
 - **Gentle timer.** When the play time is over, the screen fades to night over
   two seconds instead of cutting off.
+- **Your own voice.** An adult can record three short clips and the animals
+  answer with a familiar voice instead of the synth sound.
 - **No ads, no tracking, no accounts.** Nothing leaves the device.
 - **Fullscreen button.** One tap in the parent panel hides the browser UI.
   If the browser refuses, a short card explains the two reliable ways to lock
@@ -78,5 +80,5 @@ it. For a real child lock use one of these:
 
 ## Roadmap in one line
 
-All P0 and P1 tasks are done, plus a gentle end-of-session timer. Next: a
-favourite-animal setting.
+All P0 and P1 tasks are done, plus a gentle end-of-session timer and recorded
+parent voices. Next: counting to three.
