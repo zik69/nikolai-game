@@ -509,6 +509,67 @@
     100% { opacity: 0; transform: scale(1.7); }
   }
 
+  /* ---------- счёт до трёх ---------- */
+
+  .count {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    display: none;
+    align-items: center;
+    justify-content: center;
+  }
+
+  body[data-mode="count"] .count {
+    display: flex;
+  }
+
+  body[data-mode="count"] .stage,
+  body[data-mode="count"] .bubbles {
+    display: none;
+  }
+
+  .count-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4vmin;
+  }
+
+  .count-ball {
+    width: 22vmin;
+    height: 22vmin;
+    border-radius: 50%;
+    --ball: #ff6b6b;
+    background: radial-gradient(circle at 33% 28%, rgba(255, 255, 255, 0.95) 0%, var(--ball) 58%);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.14);
+    opacity: 0;
+    transform: scale(0.3);
+    transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease;
+  }
+
+  .count-ball[data-index="2"] {
+    --ball: #4fb3ff;
+  }
+
+  .count-ball[data-index="3"] {
+    --ball: #6fd36f;
+  }
+
+  .count-ball.on {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  .count-ball.happy {
+    animation: ball-happy 0.6s ease-in-out 2;
+  }
+
+  @keyframes ball-happy {
+    0%, 100% { transform: scale(1) translateY(0); }
+    50%      { transform: scale(1.08) translateY(-6%); }
+  }
+
   .sun {
     position: absolute;
     top: 6vh;
@@ -1436,6 +1497,14 @@
   </div>
 </main>
 
+<main class="count" id="count">
+  <div class="count-row">
+    <span class="count-ball" data-index="1"></span>
+    <span class="count-ball" data-index="2"></span>
+    <span class="count-ball" data-index="3"></span>
+  </div>
+</main>
+
 <canvas class="draw-layer" id="draw-layer" aria-hidden="true"></canvas>
 
 <div class="curtain" id="curtain" aria-hidden="true"></div>
@@ -1469,6 +1538,7 @@
         <button class="btn" type="button" data-mode="ladushki">Ладушки</button>
         <button class="btn" type="button" data-mode="sort">Размер</button>
         <button class="btn" type="button" data-mode="bedtime">Сон</button>
+        <button class="btn" type="button" data-mode="count">Счёт</button>
       </div>
     </div>
 
@@ -1557,7 +1627,7 @@
     if (saved && typeof saved.minutes === "number") {
       settings.minutes = saved.minutes;
     }
-    if (saved && (saved.mode === "bubbles" || saved.mode === "animals" || saved.mode === "sky" || saved.mode === "draw" || saved.mode === "music" || saved.mode === "ladushki" || saved.mode === "sort" || saved.mode === "bedtime")) {
+    if (saved && (saved.mode === "bubbles" || saved.mode === "animals" || saved.mode === "sky" || saved.mode === "draw" || saved.mode === "music" || saved.mode === "ladushki" || saved.mode === "sort" || saved.mode === "bedtime" || saved.mode === "count")) {
       settings.mode = saved.mode;
     }
     if (saved && typeof saved.sky === "number" && saved.sky >= 0 && saved.sky < 5) {
@@ -2753,7 +2823,104 @@
 
   loadVoices();
 
-  /* ---------- 11. Сколько можно играть ---------- */
+  /* ---------- 11. Счёт до трёх ---------- */
+
+  var countArea = document.getElementById("count");
+  var countBalls = Array.prototype.slice.call(document.querySelectorAll(".count-ball"));
+  var countStep = 0;
+  var countLocked = false;
+  var COUNT_WORDS = ["один", "два", "три"];
+  var COUNT_NOTES = [523.25, 659.25, 783.99];
+
+  function sayNumber(index) {
+    if (!settings.sound || !window.speechSynthesis) {
+      return;
+    }
+    try {
+      var utter = new SpeechSynthesisUtterance(COUNT_WORDS[index]);
+      utter.lang = "ru-RU";
+      utter.rate = 0.85;
+      utter.volume = 0.9;
+      window.speechSynthesis.cancel();
+      window.speechSynthesis.speak(utter);
+    } catch (error) {
+      // без голоса тоже хорошо — останутся ноты
+    }
+  }
+
+  function countTone(freq) {
+    if (!settings.sound) {
+      return;
+    }
+    try {
+      var ctx = audioContext();
+      if (!ctx) {
+        return;
+      }
+      var t = ctx.currentTime;
+      var osc = ctx.createOscillator();
+      var gain = ctx.createGain();
+
+      osc.type = "sine";
+      osc.frequency.value = freq;
+
+      gain.gain.setValueAtTime(0.0001, t);
+      gain.gain.exponentialRampToValueAtTime(0.12, t + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.6);
+
+      osc.connect(gain);
+      gain.connect(master);
+      osc.start(t);
+      osc.stop(t + 0.65);
+    } catch (error) {
+      // молча идём дальше
+    }
+  }
+
+  function addBall() {
+    if (countLocked || countStep >= countBalls.length) {
+      return;
+    }
+
+    var ball = countBalls[countStep];
+    ball.classList.add("on");
+    countTone(COUNT_NOTES[countStep]);
+    sayNumber(countStep);
+    countStep++;
+
+    if (countStep >= countBalls.length) {
+      countLocked = true;
+
+      window.setTimeout(function () {
+        countBalls.forEach(function (item) {
+          item.classList.add("happy");
+        });
+        playSound("chime");
+      }, 900);
+
+      window.setTimeout(function () {
+        countBalls.forEach(function (item) {
+          item.classList.remove("on", "happy");
+        });
+        countStep = 0;
+        countLocked = false;
+      }, 2400);
+    }
+  }
+
+  countArea.addEventListener("pointerdown", function () {
+    if (paused || sleeping) {
+      return;
+    }
+    if (!started) {
+      started = true;
+      warmUp();
+      startSession();
+    }
+    addBall();
+  });
+
+  /* ---------- 12. Сколько можно играть ---------- */
 
   var sessionStart = 0;
   var limitTimer = null;
@@ -2827,13 +2994,13 @@
     applyMode();
   }
 
-  /* ---------- 12. Первое касание: готовим экран ---------- */
+  /* ---------- 13. Первое касание: готовим экран ---------- */
 
   function warmUp() {
     keepScreenAwake();
   }
 
-  /* ---------- 13. Экран не гаснет, пока идёт игра ---------- */
+  /* ---------- 14. Экран не гаснет, пока идёт игра ---------- */
 
   function keepScreenAwake() {
     if (!("wakeLock" in navigator) || document.visibilityState !== "visible") {
@@ -2850,7 +3017,7 @@
     }
   });
 
-  /* ---------- 14. Полный экран ---------- */
+  /* ---------- 15. Полный экран ---------- */
 
   var fsButton = document.getElementById("fullscreen");
   var fsHint = document.getElementById("fs-hint");
@@ -2940,7 +3107,7 @@
   document.addEventListener("fullscreenchange", refreshFullscreenLabel);
   document.addEventListener("webkitfullscreenchange", refreshFullscreenLabel);
 
-  /* ---------- 15. Ребёнок не должен листать, приближать и выделять ---------- */
+  /* ---------- 16. Ребёнок не должен листать, приближать и выделять ---------- */
 
   function block(event) {
     event.preventDefault();
@@ -2966,7 +3133,7 @@
   document.addEventListener("gesturestart", block, { passive: false });
   document.addEventListener("gesturechange", block, { passive: false });
 
-  /* ---------- 16. Потайная дверь для взрослого ---------- */
+  /* ---------- 17. Потайная дверь для взрослого ---------- */
 
   var lock = document.getElementById("lock");
   var panel = document.getElementById("panel");
@@ -3135,7 +3302,7 @@
     byeScreen.hidden = true;
   });
 
-  /* ---------- 17. Кнопка «назад» остаётся в игре ---------- */
+  /* ---------- 18. Кнопка «назад» остаётся в игре ---------- */
 
   // показываем выбранную игру (и готовим холст, если выбрано рисование)
   applyMode();
