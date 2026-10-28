@@ -43,14 +43,23 @@ Online version: **https://zik69.github.io/nikolai-game/**
 - **Musical animals.** A fifth game: five animals sing notes from a pentatonic
   scale, so any combination sounds pleasant.
 - **No ads, no tracking, no accounts.** Nothing leaves the device.
+- **Fullscreen button.** One tap in the parent panel hides the browser UI.
+  If the browser refuses, a short card explains the two reliable ways to lock
+  the game on an iPad.
 
 ## On an iPad
 
 Open the online link in Safari, or save `index.html` to the Files app and open
-it from there. Safari does not allow web pages to go full screen, so the
-address bar stays visible — that is a browser limitation, not a bug.
+it from there. Sound starts on the very first tap, which is what iOS requires.
 
-Sound starts on the very first tap, which is what iOS requires.
+**Fullscreen.** iPadOS 16.4 and later lets a web page go fullscreen from the
+parent panel. A small close cross stays in the corner — the site cannot remove
+it. For a real child lock use one of these:
+
+- **Add to Home Screen** — Safari → Share → Add to Home Screen. The game opens
+  without browser chrome.
+- **Guided Access** — Settings → Accessibility → Guided Access. Triple-click
+  the side button in the game; the child cannot leave until you enter the code.
 
 ## Project documents (in Russian)
 

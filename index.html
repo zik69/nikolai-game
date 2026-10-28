@@ -652,6 +652,15 @@
     gap: 8px;
   }
 
+  .steps {
+    padding-left: 1.3em;
+    margin-bottom: 6px;
+  }
+
+  .steps li {
+    margin-bottom: 10px;
+  }
+
   .chips {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -1012,8 +1021,29 @@
       </div>
     </div>
 
+    <button class="btn wide" id="fullscreen" type="button">Во весь экран</button>
+
     <button class="btn wide" id="resume" type="button">Продолжить игру</button>
     <button class="btn wide" id="exit" type="button">Выйти из игры</button>
+  </div>
+</div>
+
+<div class="panel" id="fs-hint" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="fs-hint-title">
+    <h2 id="fs-hint-title">Полный экран не получился</h2>
+    <p class="hint">Этот браузер не разрешает сайту убрать адресную строку.
+       Вот два надёжных способа — каждый делается один раз.</p>
+
+    <ol class="steps">
+      <li><b>На экран «Домой».</b> Откройте игру в Safari, нажмите «Поделиться»
+        (квадрат со стрелкой вверх) и выберите «На экран „Домой“».
+        Игра будет открываться без адресной строки и вкладок.</li>
+      <li><b>Направленный доступ.</b> На iPad: «Настройки» → «Универсальный
+        доступ» → «Направленный доступ» → включить. Потом в игре трижды нажмите
+        боковую кнопку. Ребёнок не выйдет из игры, пока вы не введёте код.</li>
+    </ol>
+
+    <button class="btn wide" id="fs-hint-close" type="button">Понятно</button>
   </div>
 </div>
 
@@ -1692,7 +1722,6 @@
 
   function warmUp() {
     keepScreenAwake();
-    goFullScreen();
   }
 
   /* ---------- 9. Экран не гаснет, пока идёт игра ---------- */
@@ -1714,19 +1743,93 @@
 
   /* ---------- 10. Полный экран ---------- */
 
-  var isTouchDevice = window.matchMedia("(pointer: coarse)").matches;
+  var fsButton = document.getElementById("fullscreen");
+  var fsHint = document.getElementById("fs-hint");
+  var fsHintClose = document.getElementById("fs-hint-close");
 
-  function goFullScreen() {
-    if (!isTouchDevice) {
-      return;
-    }
-    var root = document.documentElement;
-    // в Safari на iPad и iPhone такого способа нет — проверяем и молча идём дальше
-    if (document.fullscreenElement || typeof root.requestFullscreen !== "function") {
-      return;
-    }
-    root.requestFullscreen({ navigationUI: "hide" }).catch(function () {});
+  function isFullscreen() {
+    return !!(document.fullscreenElement || document.webkitFullscreenElement);
   }
+
+  function refreshFullscreenLabel() {
+    fsButton.textContent = isFullscreen() ? "Выйти из полного экрана" : "Во весь экран";
+    // если полный экран всё-таки включился, подсказка больше не нужна
+    if (isFullscreen() && fsHint && !fsHint.hidden) {
+      fsHint.hidden = true;
+      paused = false;
+    }
+  }
+
+  function showFullscreenHint() {
+    closePanel();
+    paused = true;
+    fsHint.hidden = false;
+  }
+
+  function requestFullscreenNow() {
+    var root = document.documentElement;
+    var request = root.requestFullscreen || root.webkitRequestFullscreen;
+
+    if (!request) {
+      showFullscreenHint();
+      return;
+    }
+
+    try {
+      var result = request.call(root, { navigationUI: "hide" });
+      if (result && typeof result.then === "function") {
+        result.then(function () {
+          closePanel();
+          refreshFullscreenLabel();
+        }).catch(showFullscreenHint);
+      }
+
+      // страховка: некоторые браузеры молчат и ничего не делают
+      window.setTimeout(function () {
+        if (!isFullscreen()) {
+          showFullscreenHint();
+        }
+      }, 1500);
+    } catch (error) {
+      showFullscreenHint();
+    }
+  }
+
+  function exitFullscreenNow() {
+    var exit = document.exitFullscreen || document.webkitExitFullscreen;
+    if (!exit) {
+      return;
+    }
+    try {
+      var result = exit.call(document);
+      if (result && typeof result.then === "function") {
+        result.then(refreshFullscreenLabel).catch(function () {});
+      }
+    } catch (error) {
+      // уже вышли — ничего страшного
+    }
+  }
+
+  if (fsButton) {
+    fsButton.addEventListener("click", function () {
+      if (isFullscreen()) {
+        exitFullscreenNow();
+      } else {
+        requestFullscreenNow();
+      }
+      restartPanelTimer();
+    });
+  }
+
+  if (fsHintClose) {
+    fsHintClose.addEventListener("click", function () {
+      fsHint.hidden = true;
+      paused = false;
+    });
+  }
+
+  document.addEventListener("fullscreenchange", refreshFullscreenLabel);
+  document.addEventListener("webkitfullscreenchange", refreshFullscreenLabel);
 
   /* ---------- 11. Ребёнок не должен листать, приближать и выделять ---------- */
 
@@ -1925,6 +2028,7 @@
 
   // показываем выбранную игру (и готовим холст, если выбрано рисование)
   applyMode();
+  refreshFullscreenLabel();
 
   try {
     history.pushState({ game: true }, "");
