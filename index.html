@@ -386,6 +386,129 @@
     50%      { transform: scale(1.06); }
   }
 
+  /* ---------- тихая страничка перед сном ---------- */
+
+  .bedtime {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    display: none;
+    overflow: hidden;
+    background: linear-gradient(#0a1730 0%, #16264c 55%, #24375f 100%);
+    touch-action: none;
+  }
+
+  body[data-mode="bedtime"] .bedtime {
+    display: block;
+  }
+
+  body[data-mode="bedtime"] .stage,
+  body[data-mode="bedtime"] .bubbles {
+    display: none;
+  }
+
+  .stars {
+    position: absolute;
+    inset: 0;
+  }
+
+  .star {
+    position: absolute;
+    width: 3px;
+    height: 3px;
+    border-radius: 50%;
+    background: #fff;
+    opacity: 0.5;
+    animation: twinkle 6s ease-in-out infinite;
+  }
+
+  @keyframes twinkle {
+    0%, 100% { opacity: 0.2; transform: scale(0.8); }
+    50%      { opacity: 0.9; transform: scale(1.2); }
+  }
+
+  .night-moon {
+    position: absolute;
+    top: 7%;
+    right: 9%;
+    width: 17vmin;
+    height: 17vmin;
+    border-radius: 50%;
+    background: radial-gradient(circle at 38% 34%, #fffdf0 0%, #ffeaa8 62%, #f3d27f 100%);
+    box-shadow: 0 0 14vmin rgba(255, 233, 168, 0.32);
+  }
+
+  .night-hill {
+    position: absolute;
+    left: -10%;
+    right: -10%;
+    bottom: 0;
+    height: 30%;
+    background: #142138;
+    border-radius: 50% 50% 0 0 / 24% 24% 0 0;
+  }
+
+  .night-hill.back {
+    bottom: 12%;
+    height: 26%;
+    background: #1a2b4a;
+  }
+
+  .sleeping-bear {
+    position: absolute;
+    left: 50%;
+    bottom: 5%;
+    width: 26vmin;
+    transform: translateX(-50%);
+    transform-origin: center bottom;
+    animation: breathe 6s ease-in-out infinite;
+  }
+
+  .sleeping-bear svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.35));
+  }
+
+  @keyframes breathe {
+    0%, 100% { transform: translateX(-50%) scale(1); }
+    50%      { transform: translateX(-50%) scale(1.03); }
+  }
+
+  .z-z-z {
+    position: absolute;
+    left: 50%;
+    bottom: 30%;
+    color: #cfe0ff;
+    font-size: 3vmin;
+    letter-spacing: 0.4vmin;
+    opacity: 0;
+    animation: float-z 6s ease-in-out infinite;
+  }
+
+  @keyframes float-z {
+    0%   { opacity: 0; transform: translateX(60%) translateY(0) scale(0.8); }
+    35%  { opacity: 0.75; }
+    100% { opacity: 0; transform: translateX(95%) translateY(-45%) scale(1.2); }
+  }
+
+  .tap-star {
+    position: absolute;
+    width: 5vmin;
+    height: 5vmin;
+    margin: -2.5vmin 0 0 -2.5vmin;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0) 70%);
+    pointer-events: none;
+    animation: tap-star 1.6s ease-out forwards;
+  }
+
+  @keyframes tap-star {
+    0%   { opacity: 0.95; transform: scale(0.4); }
+    100% { opacity: 0; transform: scale(1.7); }
+  }
+
   .sun {
     position: absolute;
     top: 6vh;
@@ -1248,8 +1371,35 @@
   </div>
 </main>
 
-<canvas class="draw-layer" id="draw-layer" aria-hidden="true"></canvas>
+<main class="bedtime" id="bedtime">
+  <div class="stars" id="bedtime-stars"></div>
+  <div class="night-moon" aria-hidden="true"></div>
+  <div class="night-hill back" aria-hidden="true"></div>
+  <div class="night-hill" aria-hidden="true"></div>
+  <div class="z-z-z" aria-hidden="true">z z z</div>
 
+  <div class="sleeping-bear" aria-hidden="true">
+    <svg viewBox="0 0 150 150" aria-hidden="true" focusable="false">
+      <ellipse cx="52" cy="141" rx="17" ry="9" fill="#8a5a35"></ellipse>
+      <ellipse cx="98" cy="141" rx="17" ry="9" fill="#8a5a35"></ellipse>
+      <ellipse cx="75" cy="112" rx="42" ry="36" fill="#a9713f"></ellipse>
+      <ellipse cx="75" cy="121" rx="26" ry="24" fill="#e8c49a"></ellipse>
+      <circle cx="38" cy="34" r="16" fill="#a9713f"></circle>
+      <circle cx="112" cy="34" r="16" fill="#a9713f"></circle>
+      <circle cx="38" cy="34" r="8" fill="#e8c49a"></circle>
+      <circle cx="112" cy="34" r="8" fill="#e8c49a"></circle>
+      <circle cx="75" cy="64" r="38" fill="#a9713f"></circle>
+      <ellipse cx="75" cy="83" rx="22" ry="16" fill="#e8c49a"></ellipse>
+      <ellipse cx="75" cy="76" rx="7" ry="5" fill="#3a2a20"></ellipse>
+      <path d="M75 81 v4 M75 85 q-6 5 -11 0 M75 85 q6 5 11 0"
+            fill="none" stroke="#3a2a20" stroke-width="2.2" stroke-linecap="round"></path>
+      <path d="M54 58 q6 5 12 0 M84 58 q6 5 12 0"
+            fill="none" stroke="#2b2f3a" stroke-width="3" stroke-linecap="round"></path>
+    </svg>
+  </div>
+</main>
+
+<canvas class="draw-layer" id="draw-layer" aria-hidden="true"></canvas>
 
 <button class="lock" id="lock" type="button"
         aria-label="Настройки для взрослого. Удержать три секунды">
@@ -1279,6 +1429,7 @@
         <button class="btn" type="button" data-mode="music">Музыка</button>
         <button class="btn" type="button" data-mode="ladushki">Ладушки</button>
         <button class="btn" type="button" data-mode="sort">Размер</button>
+        <button class="btn" type="button" data-mode="bedtime">Сон</button>
       </div>
     </div>
 
@@ -1356,7 +1507,7 @@
     if (saved && typeof saved.minutes === "number") {
       settings.minutes = saved.minutes;
     }
-    if (saved && (saved.mode === "bubbles" || saved.mode === "animals" || saved.mode === "sky" || saved.mode === "draw" || saved.mode === "music" || saved.mode === "ladushki" || saved.mode === "sort")) {
+    if (saved && (saved.mode === "bubbles" || saved.mode === "animals" || saved.mode === "sky" || saved.mode === "draw" || saved.mode === "music" || saved.mode === "ladushki" || saved.mode === "sort" || saved.mode === "bedtime")) {
       settings.mode = saved.mode;
     }
     if (saved && typeof saved.sky === "number" && saved.sky >= 0 && saved.sky < 5) {
@@ -1376,6 +1527,13 @@
         startClapLoop();
       } else {
         stopClapLoop();
+      }
+    }
+    if (typeof startBedtime === "function") {
+      if (settings.mode === "bedtime") {
+        startBedtime();
+      } else {
+        stopBedtime();
       }
     }
   }
@@ -2182,7 +2340,125 @@
     });
   });
 
-  /* ---------- 9. Сколько можно играть ---------- */
+  /* ---------- 9. Тихая страничка перед сном ---------- */
+
+  var bedtime = document.getElementById("bedtime");
+  var bedtimeStars = document.getElementById("bedtime-stars");
+  var lullabyTimer = null;
+  var bedtimeRunning = false;
+
+  // медленная колыбельная: до, ля, соль, фа, соль, ля…
+  var LULLABY = [
+    [523.25, 1.1],
+    [440.0, 1.1],
+    [392.0, 1.5],
+    [349.23, 1.1],
+    [392.0, 1.1],
+    [440.0, 2.2],
+    [523.25, 1.1],
+    [493.88, 1.1],
+    [440.0, 1.5],
+    [392.0, 1.1],
+    [349.23, 1.1],
+    [329.63, 2.2]
+  ];
+
+  (function makeStars() {
+    for (var i = 0; i < 42; i++) {
+      var star = document.createElement("span");
+      star.className = "star";
+      star.style.left = (Math.random() * 100).toFixed(2) + "%";
+      star.style.top = (Math.random() * 58).toFixed(2) + "%";
+      star.style.animationDelay = (-Math.random() * 6).toFixed(2) + "s";
+      star.style.animationDuration = (4 + Math.random() * 5).toFixed(2) + "s";
+      bedtimeStars.appendChild(star);
+    }
+  })();
+
+  function lullabyNote(freq, duration) {
+    if (!settings.sound) {
+      return;
+    }
+    try {
+      var ctx = audioContext();
+      if (!ctx) {
+        return;
+      }
+      var t = ctx.currentTime;
+
+      // тихий голос и ещё тише — октавой ниже
+      [[1, 0.07], [0.5, 0.025]].forEach(function (voice) {
+        var osc = ctx.createOscillator();
+        var gain = ctx.createGain();
+
+        osc.type = "sine";
+        osc.frequency.value = freq * voice[0];
+
+        gain.gain.setValueAtTime(0.0001, t);
+        gain.gain.linearRampToValueAtTime(voice[1], t + 0.2);
+        gain.gain.exponentialRampToValueAtTime(0.0001, t + duration);
+
+        osc.connect(gain);
+        gain.connect(master);
+        osc.start(t);
+        osc.stop(t + duration + 0.1);
+      });
+    } catch (error) {
+      // тишина тоже подходит для сна
+    }
+  }
+
+  function playLullaby(index) {
+    if (!bedtimeRunning) {
+      return;
+    }
+    var note = LULLABY[index];
+    lullabyNote(note[0], note[1]);
+    lullabyTimer = window.setTimeout(function () {
+      playLullaby((index + 1) % LULLABY.length);
+    }, note[1] * 1000);
+  }
+
+  function startBedtime() {
+    if (bedtimeRunning) {
+      return;
+    }
+    bedtimeRunning = true;
+    playLullaby(0);
+  }
+
+  function stopBedtime() {
+    bedtimeRunning = false;
+    if (lullabyTimer) {
+      clearTimeout(lullabyTimer);
+      lullabyTimer = null;
+    }
+  }
+
+  bedtime.addEventListener("pointerdown", function (event) {
+    if (paused || sleeping) {
+      return;
+    }
+    if (!started) {
+      started = true;
+      warmUp();
+      startSession();
+    }
+
+    var star = document.createElement("span");
+    star.className = "tap-star";
+    star.style.left = event.clientX + "px";
+    star.style.top = event.clientY + "px";
+    bedtime.appendChild(star);
+
+    window.setTimeout(function () {
+      if (star.parentNode) {
+        star.parentNode.removeChild(star);
+      }
+    }, 1700);
+  });
+
+  /* ---------- 10. Сколько можно играть ---------- */
 
   var sessionStart = 0;
   var limitTimer = null;
@@ -2224,13 +2500,13 @@
     startSession();
   }
 
-  /* ---------- 10. Первое касание: готовим экран ---------- */
+  /* ---------- 11. Первое касание: готовим экран ---------- */
 
   function warmUp() {
     keepScreenAwake();
   }
 
-  /* ---------- 11. Экран не гаснет, пока идёт игра ---------- */
+  /* ---------- 12. Экран не гаснет, пока идёт игра ---------- */
 
   function keepScreenAwake() {
     if (!("wakeLock" in navigator) || document.visibilityState !== "visible") {
@@ -2247,7 +2523,7 @@
     }
   });
 
-  /* ---------- 12. Полный экран ---------- */
+  /* ---------- 13. Полный экран ---------- */
 
   var fsButton = document.getElementById("fullscreen");
   var fsHint = document.getElementById("fs-hint");
@@ -2337,7 +2613,7 @@
   document.addEventListener("fullscreenchange", refreshFullscreenLabel);
   document.addEventListener("webkitfullscreenchange", refreshFullscreenLabel);
 
-  /* ---------- 13. Ребёнок не должен листать, приближать и выделять ---------- */
+  /* ---------- 14. Ребёнок не должен листать, приближать и выделять ---------- */
 
   function block(event) {
     event.preventDefault();
@@ -2363,7 +2639,7 @@
   document.addEventListener("gesturestart", block, { passive: false });
   document.addEventListener("gesturechange", block, { passive: false });
 
-  /* ---------- 14. Потайная дверь для взрослого ---------- */
+  /* ---------- 15. Потайная дверь для взрослого ---------- */
 
   var lock = document.getElementById("lock");
   var panel = document.getElementById("panel");
@@ -2530,7 +2806,7 @@
     byeScreen.hidden = true;
   });
 
-  /* ---------- 15. Кнопка «назад» остаётся в игре ---------- */
+  /* ---------- 16. Кнопка «назад» остаётся в игре ---------- */
 
   // показываем выбранную игру (и готовим холст, если выбрано рисование)
   applyMode();

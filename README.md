@@ -46,6 +46,8 @@ Online version: **https://zik69.github.io/nikolai-game/**
   pause” rhythm, and a tap anywhere adds a clap.
 - **Big and small.** A seventh game: drag each bear into the matching house.
   A wrong drop simply sends the bear back — no scores, no “wrong”.
+- **Quiet night.** An eighth game: a dark sky, a sleeping bear and a soft
+  lullaby — nothing fast, nothing loud.
 - **No ads, no tracking, no accounts.** Nothing leaves the device.
 - **Fullscreen button.** One tap in the parent panel hides the browser UI.
   If the browser refuses, a short card explains the two reliable ways to lock
@@ -75,5 +77,5 @@ it. For a real child lock use one of these:
 ## Roadmap in one line
 
 All P0 tasks are done, plus peekaboo, bubbles, the colour-changing sky, finger
-drawing, musical animals, clapping and size sorting. Next: a quiet bedtime
-screen.
+drawing, musical animals, clapping, size sorting and a quiet bedtime screen.
+Next: a softer end-of-session timer.
