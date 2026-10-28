@@ -33,6 +33,9 @@ Online version: **https://zik69.github.io/nikolai-game/**
   taps stop working. Only an adult can bring the game back.
 - **Peekaboo.** Tap a character and it vanishes with a little puff, then pops
   back with a two-note “ku-ku”.
+- **Bubbles.** A second game: thirteen slow bubbles float up, pop on touch with
+  a soft sound and come back from the bottom. An adult switches games in the
+  parent panel.
 - **No ads, no tracking, no accounts.** Nothing leaves the device.
 
 ## On an iPad
@@ -52,5 +55,5 @@ Sound starts on the very first tap, which is what iOS requires.
 
 ## Roadmap in one line
 
-All P0 tasks are done, plus peekaboo. Next: bubbles, colours, finger drawing and
-music.
+All P0 tasks are done, plus peekaboo and bubbles. Next: colour-changing sky,
+finger drawing and music.

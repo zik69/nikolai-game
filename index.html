@@ -279,6 +279,71 @@
     100% { transform: scale(1) rotate(0deg); opacity: 1; }
   }
 
+  /* ---------- мыльные пузыри ---------- */
+
+  .bubbles {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    display: none;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  body[data-mode="bubbles"] .bubbles {
+    display: block;
+  }
+
+  body[data-mode="bubbles"] .stage {
+    display: none;
+  }
+
+  .bubble {
+    position: absolute;
+    bottom: -24vh;
+    pointer-events: auto;
+    animation-name: rise;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+    will-change: transform;
+  }
+
+  .bubble-body {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.7);
+    background:
+      radial-gradient(circle at 32% 28%,
+        rgba(255, 255, 255, 0.95) 0%,
+        rgba(255, 255, 255, 0.35) 16%,
+        rgba(255, 255, 255, 0.06) 40%,
+        rgba(130, 205, 240, 0.16) 68%,
+        rgba(90, 170, 220, 0.3) 100%);
+    box-shadow:
+      inset -7px -9px 16px rgba(110, 185, 230, 0.22),
+      0 6px 14px rgba(70, 140, 190, 0.12);
+    transition: transform 0.16s ease-out, opacity 0.16s ease-out;
+  }
+
+  .bubble.popped {
+    animation-play-state: paused;
+  }
+
+  .bubble.popped .bubble-body {
+    transform: scale(1.4);
+    opacity: 0;
+  }
+
+  @keyframes rise {
+    0%   { transform: translate3d(0, 0, 0); }
+    25%  { transform: translate3d(18px, -28vh, 0); }
+    50%  { transform: translate3d(-14px, -56vh, 0); }
+    75%  { transform: translate3d(16px, -84vh, 0); }
+    100% { transform: translate3d(0, -128vh, 0); }
+  }
+
   /* ---------- потайная дверь для взрослого ---------- */
 
   .lock {
@@ -418,6 +483,10 @@
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 8px;
+  }
+
+  .chips.two {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .wide {
@@ -598,6 +667,9 @@
 
 </main>
 
+<div class="bubbles" id="bubbles" aria-hidden="true"></div>
+
+
 <button class="lock" id="lock" type="button"
         aria-label="Настройки для взрослого. Удержать три секунды">
   <svg viewBox="0 0 46 46" aria-hidden="true" focusable="false">
@@ -614,6 +686,14 @@
     <div class="row">
       <span>Звук</span>
       <button class="btn" id="sound-toggle" type="button" aria-pressed="true">Вкл</button>
+    </div>
+
+    <div class="row stacked">
+      <span>Что показывать</span>
+      <div class="chips two" id="mode-chips">
+        <button class="btn" type="button" data-mode="animals">Звери</button>
+        <button class="btn" type="button" data-mode="bubbles">Пузыри</button>
+      </div>
     </div>
 
     <div class="row stacked">
@@ -657,7 +737,7 @@
   /* ---------- 0. Настройки взрослого ---------- */
 
   var SETTINGS_KEY = "nikolai-game:settings";
-  var settings = { sound: true, minutes: 10 };
+  var settings = { sound: true, minutes: 10, mode: "animals" };
 
   try {
     var saved = JSON.parse(localStorage.getItem(SETTINGS_KEY) || "null");
@@ -667,9 +747,18 @@
     if (saved && typeof saved.minutes === "number") {
       settings.minutes = saved.minutes;
     }
+    if (saved && (saved.mode === "bubbles" || saved.mode === "animals")) {
+      settings.mode = saved.mode;
+    }
   } catch (error) {
     // браузер не дал прочитать настройки — играем на значениях по умолчанию
   }
+
+  function applyMode() {
+    document.body.dataset.mode = settings.mode;
+  }
+
+  applyMode();
 
   function saveSettings() {
     try {
@@ -822,7 +911,27 @@
     kukuNote(ctx, t + 0.22, 620);
   }
 
-  var sounds = { cat: meow, bear: growl, car: honk, kuku: kuku };
+  // «Чпок»: короткий звук лопнувшего пузыря
+  function popSound(ctx) {
+    var t = ctx.currentTime;
+    var osc = ctx.createOscillator();
+    var gain = ctx.createGain();
+
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(880, t);
+    osc.frequency.exponentialRampToValueAtTime(170, t + 0.08);
+
+    gain.gain.setValueAtTime(0.0001, t);
+    gain.gain.exponentialRampToValueAtTime(0.16, t + 0.008);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.11);
+
+    osc.connect(gain);
+    gain.connect(master);
+    osc.start(t);
+    osc.stop(t + 0.12);
+  }
+
+  var sounds = { cat: meow, bear: growl, car: honk, kuku: kuku, pop: popSound };
 
   function playSound(name) {
     if (!settings.sound) {
@@ -905,7 +1014,80 @@
     }
   }
 
-  /* ---------- 3. Сколько можно играть ---------- */
+  /* ---------- 3. Мыльные пузыри ---------- */
+
+  var bubbleLayer = document.getElementById("bubbles");
+  var BUBBLE_COUNT = 13;
+
+  function randomBetween(min, max) {
+    return min + Math.random() * (max - min);
+  }
+
+  function placeBubble(bubble, slot) {
+    var size = randomBetween(70, 170);
+    var duration = randomBetween(11, 18);
+    bubble.style.width = size + "px";
+    bubble.style.height = size + "px";
+    bubble.style.left = randomBetween(2, 88) + "%";
+    bubble.style.animationDuration = duration + "s";
+
+    if (slot === null) {
+      // новый пузырь всегда начинает путь снизу
+      bubble.style.animationDelay = "0s";
+    } else {
+      // при первом запуске расставляем пузыри равномерно по всему полю,
+      // чтобы экран не был пустым
+      var share = (slot + Math.random() * 0.7) / BUBBLE_COUNT;
+      bubble.style.animationDelay = -(share * duration) + "s";
+    }
+  }
+
+  function makeBubble(slot) {
+    var bubble = document.createElement("div");
+    bubble.className = "bubble";
+    bubble.innerHTML = '<span class="bubble-body"></span>';
+    placeBubble(bubble, slot);
+    bubbleLayer.appendChild(bubble);
+  }
+
+  function popBubble(bubble) {
+    if (bubble.classList.contains("popped")) {
+      return;
+    }
+    bubble.classList.add("popped");
+    playSound("pop");
+
+    window.setTimeout(function () {
+      bubble.classList.remove("popped");
+      // заново снизу, уже в другом месте
+      bubble.style.animation = "none";
+      void bubble.offsetWidth;
+      placeBubble(bubble, null);
+      bubble.style.animation = "";
+    }, randomBetween(900, 1800));
+  }
+
+  for (var b = 0; b < BUBBLE_COUNT; b++) {
+    makeBubble(b);
+  }
+
+  bubbleLayer.addEventListener("pointerdown", function (event) {
+    if (paused || sleeping) {
+      return;
+    }
+    var bubble = event.target.closest ? event.target.closest(".bubble") : null;
+    if (!bubble) {
+      return;
+    }
+    if (!started) {
+      started = true;
+      warmUp();
+      startSession();
+    }
+    popBubble(bubble);
+  });
+
+  /* ---------- 4. Сколько можно играть ---------- */
 
   var sessionStart = 0;
   var limitTimer = null;
@@ -947,14 +1129,14 @@
     startSession();
   }
 
-  /* ---------- 4. Первое касание: готовим экран ---------- */
+  /* ---------- 5. Первое касание: готовим экран ---------- */
 
   function warmUp() {
     keepScreenAwake();
     goFullScreen();
   }
 
-  /* ---------- 5. Экран не гаснет, пока идёт игра ---------- */
+  /* ---------- 6. Экран не гаснет, пока идёт игра ---------- */
 
   function keepScreenAwake() {
     if (!("wakeLock" in navigator) || document.visibilityState !== "visible") {
@@ -971,7 +1153,7 @@
     }
   });
 
-  /* ---------- 6. Полный экран ---------- */
+  /* ---------- 7. Полный экран ---------- */
 
   var isTouchDevice = window.matchMedia("(pointer: coarse)").matches;
 
@@ -987,7 +1169,7 @@
     root.requestFullscreen({ navigationUI: "hide" }).catch(function () {});
   }
 
-  /* ---------- 7. Ребёнок не должен листать, приближать и выделять ---------- */
+  /* ---------- 8. Ребёнок не должен листать, приближать и выделять ---------- */
 
   function block(event) {
     event.preventDefault();
@@ -1013,12 +1195,13 @@
   document.addEventListener("gesturestart", block, { passive: false });
   document.addEventListener("gesturechange", block, { passive: false });
 
-  /* ---------- 8. Потайная дверь для взрослого ---------- */
+  /* ---------- 9. Потайная дверь для взрослого ---------- */
 
   var lock = document.getElementById("lock");
   var panel = document.getElementById("panel");
   var soundToggle = document.getElementById("sound-toggle");
   var chips = document.getElementById("time-chips");
+  var modeChips = document.getElementById("mode-chips");
   var resumeBtn = document.getElementById("resume");
   var exitBtn = document.getElementById("exit");
   var sleepScreen = document.getElementById("sleep");
@@ -1066,6 +1249,10 @@
     Array.prototype.forEach.call(chips.children, function (chip) {
       var minutes = Number(chip.getAttribute("data-minutes"));
       chip.classList.toggle("active", minutes === settings.minutes);
+    });
+
+    Array.prototype.forEach.call(modeChips.children, function (chip) {
+      chip.classList.toggle("active", chip.getAttribute("data-mode") === settings.mode);
     });
 
     exitBtn.textContent = "Выйти из игры";
@@ -1133,6 +1320,18 @@
     }
   });
 
+  modeChips.addEventListener("click", function (event) {
+    var chip = event.target.closest ? event.target.closest("[data-mode]") : null;
+    if (!chip) {
+      return;
+    }
+    settings.mode = chip.getAttribute("data-mode");
+    saveSettings();
+    applyMode();
+    refreshPanel();
+    restartPanelTimer();
+  });
+
   resumeBtn.addEventListener("click", function () {
     closePanel();
     if (sleeping) {
@@ -1157,7 +1356,7 @@
     byeScreen.hidden = true;
   });
 
-  /* ---------- 9. Кнопка «назад» остаётся в игре ---------- */
+  /* ---------- 10. Кнопка «назад» остаётся в игре ---------- */
 
   try {
     history.pushState({ game: true }, "");
