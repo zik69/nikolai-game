@@ -55,7 +55,8 @@ Online version: **https://zik69.github.io/nikolai-game/**
 - **Counting.** A ninth game: tap and a new ball appears — red, blue, green —
   with its own note and the number spoken out loud.
 - **Seasons.** A tenth game: a meadow with a tree that changes with the season —
-  snow, petals, sparkles or leaves.
+  snow, petals, sparkles or leaves. Build a snowman in winter, grow flowers in
+  spring, catch butterflies in summer, collect leaves in autumn.
 - **Garage.** An eleventh game: tap and the door rolls up, the car drives out,
   turns around and parks back inside.
 - **No ads, no tracking, no accounts.** Nothing leaves the device.

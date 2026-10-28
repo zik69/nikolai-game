@@ -757,6 +757,229 @@
     100% { opacity: 0; transform: scale(2.2); }
   }
 
+  /* ---------- сезонные забавы ---------- */
+
+  .snowman {
+    position: absolute;
+    left: 27%;
+    bottom: 16%;
+    width: 30vmin;
+    height: 50vmin;
+    transform: translateX(-50%);
+    display: none;
+  }
+
+  #year[data-season="winter"] .snowman {
+    display: block;
+  }
+
+  #year[data-season="winter"] .year-tree {
+    transform: translateX(-50%) translateX(16vmin);
+  }
+
+  .snowball {
+    position: absolute;
+    left: 50%;
+    border-radius: 50%;
+    background: radial-gradient(circle at 36% 30%, #ffffff 0%, #eaf4ff 68%, #d6e7f7 100%);
+    box-shadow: 0 6px 12px rgba(90, 130, 170, 0.16);
+    transform: translateX(-50%) scale(0);
+    opacity: 0;
+    transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease;
+  }
+
+  .snowball.on {
+    transform: translateX(-50%) scale(1);
+    opacity: 1;
+  }
+
+  .snowball:nth-child(1) { bottom: 0; width: 28vmin; height: 28vmin; }
+  .snowball:nth-child(2) { bottom: 19vmin; width: 20vmin; height: 20vmin; }
+  .snowball:nth-child(3) { bottom: 33vmin; width: 14vmin; height: 14vmin; }
+
+  .snowball:nth-child(3)::before,
+  .snowball:nth-child(3)::after {
+    content: "";
+    position: absolute;
+    top: 34%;
+    width: 1.6vmin;
+    height: 1.6vmin;
+    border-radius: 50%;
+    background: #2b2f3a;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .snowball:nth-child(3)::before { left: 26%; }
+  .snowball:nth-child(3)::after { right: 26%; }
+
+  .snowman.done .snowball:nth-child(3)::before,
+  .snowman.done .snowball:nth-child(3)::after {
+    opacity: 1;
+  }
+
+  .snowman-nose {
+    position: absolute;
+    left: 50%;
+    bottom: 38.5vmin;
+    width: 5vmin;
+    height: 1.6vmin;
+    background: #ff9f43;
+    border-radius: 0 60% 60% 0;
+    transform: translateX(1vmin) scaleX(0);
+    transform-origin: left center;
+    transition: transform 0.3s ease;
+  }
+
+  .snowman.done .snowman-nose {
+    transform: translateX(1vmin) scaleX(1);
+  }
+
+  .flowers {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  .flower {
+    position: absolute;
+    width: 7vmin;
+    height: 7vmin;
+    margin: -3.5vmin 0 0 -3.5vmin;
+    transform: scale(0);
+    animation: flower-bloom 0.4s ease-out forwards;
+  }
+
+  .flower::before {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 2.4vmin;
+    height: 2.4vmin;
+    margin: -1.2vmin 0 0 -1.2vmin;
+    border-radius: 50%;
+    background: #ffd95e;
+    box-shadow:
+      0 -2.6vmin 0 #ff9ec2,
+      2.4vmin -0.8vmin 0 #ff9ec2,
+      1.5vmin 2.1vmin 0 #ff9ec2,
+      -1.5vmin 2.1vmin 0 #ff9ec2,
+      -2.4vmin -0.8vmin 0 #ff9ec2;
+  }
+
+  @keyframes flower-bloom {
+    0%   { transform: scale(0); }
+    70%  { transform: scale(1.15); }
+    100% { transform: scale(1); }
+  }
+
+  .butterflies {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    display: none;
+  }
+
+  #year[data-season="summer"] .butterflies {
+    display: block;
+  }
+
+  .butterfly {
+    position: absolute;
+    width: 10vmin;
+    height: 7vmin;
+    pointer-events: auto;
+    animation: flutter 14s ease-in-out infinite;
+    will-change: transform;
+  }
+
+  .wing {
+    position: absolute;
+    top: 0;
+    width: 4.2vmin;
+    height: 6.4vmin;
+  }
+
+  .wing::before,
+  .wing::after {
+    content: "";
+    position: absolute;
+    background: #ffb02e;
+  }
+
+  .wing::before {
+    top: 0;
+    width: 4.2vmin;
+    height: 4.2vmin;
+    border-radius: 55% 55% 40% 40%;
+  }
+
+  .wing::after {
+    bottom: 0;
+    left: 0.4vmin;
+    width: 3.3vmin;
+    height: 3.3vmin;
+    border-radius: 40% 40% 55% 55%;
+    background: #ffc95e;
+  }
+
+  .wing.left {
+    left: 0;
+  }
+
+  .wing.right {
+    right: 0;
+    transform: scaleX(-1);
+  }
+
+  .butterfly .body {
+    position: absolute;
+    left: 50%;
+    top: 14%;
+    width: 0.9vmin;
+    height: 5.6vmin;
+    margin-left: -0.45vmin;
+    border-radius: 1vmin;
+    background: #5a3b22;
+  }
+
+  @keyframes flutter {
+    0%   { transform: translate(0, 0) rotate(-6deg); }
+    50%  { transform: translate(5vw, -4vh) rotate(6deg); }
+    100% { transform: translate(0, 0) rotate(-6deg); }
+  }
+
+  .falling-leaf {
+    position: absolute;
+    width: 3.6vmin;
+    height: 3vmin;
+    border-radius: 62% 8% 62% 8%;
+    background: #ef9450;
+    transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.7s ease;
+    pointer-events: none;
+  }
+
+  .leaf-pile {
+    position: absolute;
+    left: 5%;
+    bottom: 14%;
+    width: 16vmin;
+    height: 0;
+    background: #e8894a;
+    border-radius: 50% 50% 0 0 / 60% 60% 0 0;
+    transition: height 0.3s ease;
+  }
+
+  .leaf-pile.full {
+    animation: pile-jump 0.5s ease-in-out 2;
+  }
+
+  @keyframes pile-jump {
+    0%, 100% { transform: translateY(0) scaleY(1); }
+    50%      { transform: translateY(-12%) scaleY(1.1); }
+  }
+
   /* ---------- гараж ---------- */
 
   .garage {
@@ -1818,6 +2041,17 @@
   </div>
 
   <div class="weather" id="weather" aria-hidden="true"></div>
+
+  <div class="snowman" id="snowman" aria-hidden="true">
+    <span class="snowball"></span>
+    <span class="snowball"></span>
+    <span class="snowball"></span>
+    <span class="snowman-nose"></span>
+  </div>
+
+  <div class="flowers" id="flowers" aria-hidden="true"></div>
+  <div class="butterflies" id="butterflies" aria-hidden="true"></div>
+  <div class="leaf-pile" id="leaf-pile" aria-hidden="true"></div>
 </main>
 
 <main class="garage" id="garage">
@@ -2284,7 +2518,27 @@
     osc.stop(t + 1.5);
   }
 
-  var sounds = { cat: meow, bear: growl, car: honk, kuku: kuku, pop: popSound, chime: chime, clap: clapSound, goodnight: goodnightSound, star: starSound };
+  // «Снежок»: мягкий низкий пух
+  function snowSound(ctx) {
+    var t = ctx.currentTime;
+    var osc = ctx.createOscillator();
+    var gain = ctx.createGain();
+
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(220, t);
+    osc.frequency.exponentialRampToValueAtTime(120, t + 0.12);
+
+    gain.gain.setValueAtTime(0.0001, t);
+    gain.gain.exponentialRampToValueAtTime(0.12, t + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.26);
+
+    osc.connect(gain);
+    gain.connect(master);
+    osc.start(t);
+    osc.stop(t + 0.3);
+  }
+
+  var sounds = { cat: meow, bear: growl, car: honk, kuku: kuku, pop: popSound, chime: chime, clap: clapSound, goodnight: goodnightSound, star: starSound, snow: snowSound };
 
   function playSound(name) {
     if (!settings.sound) {
@@ -3381,6 +3635,13 @@
     yearArea.dataset.season = settings.season;
     buildWeather();
 
+    if (typeof clearSeasonProps === "function") {
+      clearSeasonProps();
+    }
+    if (settings.season === "summer" && typeof makeButterflies === "function") {
+      makeButterflies();
+    }
+
     if (seasonChips) {
       Array.prototype.forEach.call(seasonChips.children, function (chip) {
         chip.classList.toggle("active", chip.getAttribute("data-season") === settings.season);
@@ -3405,6 +3666,19 @@
     yearArea.appendChild(ring);
     playSound("star");
 
+    if (settings.season === "winter") {
+      addSnowball();
+    } else if (settings.season === "spring") {
+      bloomFlower(event.clientX, event.clientY);
+    } else if (settings.season === "autumn") {
+      dropLeaf();
+    } else if (settings.season === "summer") {
+      var butterfly = event.target.closest ? event.target.closest(".butterfly") : null;
+      if (butterfly) {
+        scareButterfly(butterfly);
+      }
+    }
+
     window.setTimeout(function () {
       if (ring.parentNode) {
         ring.parentNode.removeChild(ring);
@@ -3412,7 +3686,191 @@
     }, 950);
   });
 
-  /* ---------- 13. Гараж ---------- */
+  /* ---------- 13. Сезонные забавы ---------- */
+
+  var snowman = document.getElementById("snowman");
+  var snowBalls = Array.prototype.slice.call(document.querySelectorAll(".snowball"));
+  var flowersLayer = document.getElementById("flowers");
+  var butterfliesLayer = document.getElementById("butterflies");
+  var leafPile = document.getElementById("leaf-pile");
+  var snowStep = 0;
+  var flowers = [];
+  var butterflies = [];
+  var pileCount = 0;
+  var seasonBusy = false;
+  var FLOWER_NOTES = [392, 440, 523.25, 587.33, 659.25, 783.99];
+
+  function clearSeasonProps() {
+    snowStep = 0;
+    seasonBusy = false;
+    if (snowman) {
+      snowman.classList.remove("done");
+    }
+    snowBalls.forEach(function (ball) {
+      ball.classList.remove("on");
+    });
+    flowers.forEach(function (flower) {
+      if (flower.parentNode) {
+        flower.parentNode.removeChild(flower);
+      }
+    });
+    flowers = [];
+    butterflies.forEach(function (butterfly) {
+      if (butterfly.parentNode) {
+        butterfly.parentNode.removeChild(butterfly);
+      }
+    });
+    butterflies = [];
+    pileCount = 0;
+    if (leafPile) {
+      leafPile.style.height = "0vmin";
+      leafPile.classList.remove("full");
+    }
+  }
+
+  function addSnowball() {
+    if (seasonBusy || snowStep >= snowBalls.length) {
+      return;
+    }
+    snowBalls[snowStep].classList.add("on");
+    playSound("snow");
+    snowStep++;
+
+    if (snowStep === snowBalls.length) {
+      seasonBusy = true;
+      snowman.classList.add("done");
+
+      window.setTimeout(function () {
+        snowman.classList.remove("done");
+        snowBalls.forEach(function (ball) {
+          ball.classList.remove("on");
+        });
+        snowStep = 0;
+        seasonBusy = false;
+      }, 2600);
+    }
+  }
+
+  function bloomFlower(x, y) {
+    if (seasonBusy || flowers.length >= 6) {
+      return;
+    }
+
+    var flower = document.createElement("span");
+    flower.className = "flower";
+    flower.style.left = x + "px";
+    flower.style.top = y + "px";
+    flowersLayer.appendChild(flower);
+    flowers.push(flower);
+
+    countTone(FLOWER_NOTES[flowers.length - 1]);
+
+    if (flowers.length === 6) {
+      seasonBusy = true;
+      window.setTimeout(function () {
+        flowers.forEach(function (item) {
+          if (item.parentNode) {
+            item.parentNode.removeChild(item);
+          }
+        });
+        flowers = [];
+        seasonBusy = false;
+      }, 1800);
+    }
+  }
+
+  function addButterfly(index) {
+    if (!butterfliesLayer) {
+      return;
+    }
+    var butterfly = document.createElement("span");
+    butterfly.className = "butterfly";
+    butterfly.dataset.index = index;
+    butterfly.innerHTML =
+      '<span class="wing left"></span><span class="wing right"></span><span class="body"></span>';
+    butterfly.style.left = (12 + Math.random() * 66).toFixed(1) + "%";
+    butterfly.style.top = (20 + Math.random() * 26).toFixed(1) + "%";
+    butterfly.style.animationDuration = (12 + Math.random() * 6).toFixed(1) + "s";
+    butterfly.style.animationDelay = (-Math.random() * 8).toFixed(1) + "s";
+    butterfliesLayer.appendChild(butterfly);
+    butterflies.push(butterfly);
+  }
+
+  function makeButterflies() {
+    for (var i = 0; i < 3; i++) {
+      addButterfly(i);
+    }
+  }
+
+  function scareButterfly(butterfly) {
+    if (butterfly.dataset.gone === "yes") {
+      return;
+    }
+    butterfly.dataset.gone = "yes";
+    butterfly.style.animation = "none";
+    butterfly.style.transition = "transform 0.8s ease, opacity 0.8s ease";
+    butterfly.style.transform = "translate(0, -18vh) scale(0.6)";
+    butterfly.style.opacity = "0";
+    playSound("star");
+
+    var index = Number(butterfly.dataset.index);
+
+    window.setTimeout(function () {
+      if (butterfly.parentNode) {
+        butterfly.parentNode.removeChild(butterfly);
+      }
+      butterflies = butterflies.filter(function (item) {
+        return item !== butterfly;
+      });
+      if (settings.mode === "year" && settings.season === "summer") {
+        addButterfly(index);
+      }
+    }, 2600);
+  }
+
+  function dropLeaf() {
+    if (seasonBusy || !leafPile) {
+      return;
+    }
+
+    var leaf = document.createElement("span");
+    leaf.className = "falling-leaf";
+    leaf.style.left = (8 + Math.random() * 70).toFixed(1) + "%";
+    leaf.style.top = (8 + Math.random() * 26).toFixed(1) + "%";
+    yearArea.appendChild(leaf);
+
+    var pileRect = leafPile.getBoundingClientRect();
+    var leafRect = leaf.getBoundingClientRect();
+    var dx = pileRect.left + pileRect.width / 2 - (leafRect.left + leafRect.width / 2);
+    var dy = pileRect.top + pileRect.height / 2 - (leafRect.top + leafRect.height / 2);
+
+    void leaf.offsetWidth;
+    leaf.style.transform = "translate(" + dx + "px, " + dy + "px) scale(0.6)";
+    leaf.style.opacity = "0.9";
+
+    window.setTimeout(function () {
+      if (leaf.parentNode) {
+        leaf.parentNode.removeChild(leaf);
+      }
+      pileCount++;
+      leafPile.style.height = (1.2 + pileCount * 1.4).toFixed(1) + "vmin";
+
+      if (pileCount >= 5) {
+        seasonBusy = true;
+        leafPile.classList.add("full");
+        playSound("chime");
+
+        window.setTimeout(function () {
+          leafPile.classList.remove("full");
+          leafPile.style.height = "0vmin";
+          pileCount = 0;
+          seasonBusy = false;
+        }, 1600);
+      }
+    }, 760);
+  }
+
+  /* ---------- 14. Гараж ---------- */
 
   var garage = document.getElementById("garage");
   var garageBusy = false;
@@ -3462,7 +3920,7 @@
     driveOut();
   });
 
-  /* ---------- 14. Сколько можно играть ---------- */
+  /* ---------- 15. Сколько можно играть ---------- */
 
   var sessionStart = 0;
   var limitTimer = null;
@@ -3536,13 +3994,13 @@
     applyMode();
   }
 
-  /* ---------- 15. Первое касание: готовим экран ---------- */
+  /* ---------- 16. Первое касание: готовим экран ---------- */
 
   function warmUp() {
     keepScreenAwake();
   }
 
-  /* ---------- 16. Экран не гаснет, пока идёт игра ---------- */
+  /* ---------- 17. Экран не гаснет, пока идёт игра ---------- */
 
   function keepScreenAwake() {
     if (!("wakeLock" in navigator) || document.visibilityState !== "visible") {
@@ -3559,7 +4017,7 @@
     }
   });
 
-  /* ---------- 17. Полный экран ---------- */
+  /* ---------- 18. Полный экран ---------- */
 
   var fsButton = document.getElementById("fullscreen");
   var fsHint = document.getElementById("fs-hint");
@@ -3649,7 +4107,7 @@
   document.addEventListener("fullscreenchange", refreshFullscreenLabel);
   document.addEventListener("webkitfullscreenchange", refreshFullscreenLabel);
 
-  /* ---------- 18. Ребёнок не должен листать, приближать и выделять ---------- */
+  /* ---------- 19. Ребёнок не должен листать, приближать и выделять ---------- */
 
   function block(event) {
     event.preventDefault();
@@ -3675,7 +4133,7 @@
   document.addEventListener("gesturestart", block, { passive: false });
   document.addEventListener("gesturechange", block, { passive: false });
 
-  /* ---------- 19. Потайная дверь для взрослого ---------- */
+  /* ---------- 20. Потайная дверь для взрослого ---------- */
 
   var lock = document.getElementById("lock");
   var panel = document.getElementById("panel");
@@ -3862,7 +4320,7 @@
     byeScreen.hidden = true;
   });
 
-  /* ---------- 20. Кнопка «назад» остаётся в игре ---------- */
+  /* ---------- 21. Кнопка «назад» остаётся в игре ---------- */
 
   // показываем выбранную игру (и готовим холст, если выбрано рисование)
   applyMode();
