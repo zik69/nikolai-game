@@ -109,6 +109,112 @@
     display: none;
   }
 
+  /* ---------- музыкальные звери ---------- */
+
+  .music {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    display: none;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 1vmin;
+    padding:
+      max(5vh, env(safe-area-inset-top))
+      max(3vw, env(safe-area-inset-right))
+      max(8vh, env(safe-area-inset-bottom))
+      max(3vw, env(safe-area-inset-left));
+    align-items: end;
+  }
+
+  body[data-mode="music"] .music {
+    display: grid;
+  }
+
+  body[data-mode="music"] .stage,
+  body[data-mode="music"] .bubbles {
+    display: none;
+  }
+
+  @media (orientation: portrait) {
+    .music {
+      grid-template-columns: 1fr;
+      grid-template-rows: repeat(5, minmax(0, 1fr));
+      padding-left: max(16vw, env(safe-area-inset-left));
+      padding-right: max(16vw, env(safe-area-inset-right));
+    }
+  }
+
+  .key {
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    min-width: 0;
+    min-height: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    -webkit-appearance: none;
+    appearance: none;
+    cursor: pointer;
+    isolation: isolate;
+  }
+
+  .key:focus {
+    outline: none;
+  }
+
+  .key:focus-visible {
+    outline: 4px solid rgba(255, 255, 255, 0.9);
+    outline-offset: -6px;
+    border-radius: 28px;
+  }
+
+  .halo {
+    position: absolute;
+    left: 50%;
+    bottom: 3%;
+    width: 96%;
+    aspect-ratio: 1;
+    transform: translateX(-50%);
+    border-radius: 50%;
+    background: radial-gradient(circle, var(--halo) 0%, rgba(255, 255, 255, 0) 68%);
+    opacity: 0.5;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .key svg {
+    position: relative;
+    z-index: 1;
+    display: block;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    filter: drop-shadow(0 8px 12px rgba(0, 0, 0, 0.16));
+  }
+
+  .key.hit svg {
+    animation: keypop 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .key.hit .halo {
+    animation: halo-pulse 0.55s ease-out;
+  }
+
+  @keyframes keypop {
+    0%   { transform: scale(1); }
+    40%  { transform: scale(1.1); }
+    100% { transform: scale(1); }
+  }
+
+  @keyframes halo-pulse {
+    0%   { transform: translateX(-50%) scale(0.8); opacity: 0.95; }
+    100% { transform: translateX(-50%) scale(1.5); opacity: 0; }
+  }
+
   .sun {
     position: absolute;
     top: 6vh;
@@ -737,6 +843,126 @@
 
 </main>
 
+<main class="music" id="music">
+
+  <!-- Кошка — до -->
+  <button class="key" type="button" data-note="0" style="--halo: rgba(246, 160, 77, 0.55)"
+          aria-label="Кошка, нота до">
+    <span class="halo" aria-hidden="true"></span>
+    <svg viewBox="0 0 140 150" preserveAspectRatio="xMidYMax meet" aria-hidden="true" focusable="false">
+      <path d="M104 120 C140 120 140 76 116 72" fill="none" stroke="#f6a04d"
+            stroke-width="13" stroke-linecap="round"></path>
+      <ellipse cx="70" cy="112" rx="40" ry="35" fill="#f6a04d"></ellipse>
+      <ellipse cx="70" cy="122" rx="23" ry="21" fill="#ffd9a8"></ellipse>
+      <ellipse cx="50" cy="141" rx="15" ry="9" fill="#ffd9a8"></ellipse>
+      <ellipse cx="90" cy="141" rx="15" ry="9" fill="#ffd9a8"></ellipse>
+      <path d="M40 44 L44 14 L70 33 Z" fill="#f6a04d"></path>
+      <path d="M100 44 L96 14 L70 33 Z" fill="#f6a04d"></path>
+      <path d="M48 39 L50 24 L62 34 Z" fill="#ff9db5"></path>
+      <path d="M92 39 L90 24 L78 34 Z" fill="#ff9db5"></path>
+      <circle cx="70" cy="64" r="34" fill="#f6a04d"></circle>
+      <ellipse cx="57" cy="60" rx="6" ry="7.5" fill="#2b2f3a"></ellipse>
+      <ellipse cx="83" cy="60" rx="6" ry="7.5" fill="#2b2f3a"></ellipse>
+      <circle cx="59" cy="57" r="2.2" fill="#fff"></circle>
+      <circle cx="85" cy="57" r="2.2" fill="#fff"></circle>
+      <path d="M65 73 H75 L70 79 Z" fill="#ff7f9a"></path>
+      <path d="M70 79 v4 M70 83 q-5 4 -9 0 M70 83 q5 4 9 0"
+            fill="none" stroke="#c96a35" stroke-width="2.2" stroke-linecap="round"></path>
+      <path d="M26 70 H45 M26 80 H45 M114 70 H95 M114 80 H95"
+            stroke="#fff" stroke-width="2.6" stroke-linecap="round" opacity="0.95"></path>
+    </svg>
+  </button>
+
+  <!-- Мишка — ре -->
+  <button class="key" type="button" data-note="1" style="--halo: rgba(169, 113, 63, 0.5)"
+          aria-label="Мишка, нота ре">
+    <span class="halo" aria-hidden="true"></span>
+    <svg viewBox="0 0 150 150" preserveAspectRatio="xMidYMax meet" aria-hidden="true" focusable="false">
+      <ellipse cx="52" cy="141" rx="17" ry="9" fill="#8a5a35"></ellipse>
+      <ellipse cx="98" cy="141" rx="17" ry="9" fill="#8a5a35"></ellipse>
+      <ellipse cx="75" cy="112" rx="42" ry="36" fill="#a9713f"></ellipse>
+      <ellipse cx="75" cy="121" rx="26" ry="24" fill="#e8c49a"></ellipse>
+      <circle cx="38" cy="34" r="16" fill="#a9713f"></circle>
+      <circle cx="112" cy="34" r="16" fill="#a9713f"></circle>
+      <circle cx="38" cy="34" r="8" fill="#e8c49a"></circle>
+      <circle cx="112" cy="34" r="8" fill="#e8c49a"></circle>
+      <circle cx="75" cy="64" r="38" fill="#a9713f"></circle>
+      <ellipse cx="75" cy="83" rx="22" ry="16" fill="#e8c49a"></ellipse>
+      <ellipse cx="75" cy="76" rx="7" ry="5" fill="#3a2a20"></ellipse>
+      <path d="M75 81 v4 M75 85 q-6 5 -11 0 M75 85 q6 5 11 0"
+            fill="none" stroke="#3a2a20" stroke-width="2.2" stroke-linecap="round"></path>
+      <circle cx="60" cy="57" r="5.5" fill="#2b2f3a"></circle>
+      <circle cx="90" cy="57" r="5.5" fill="#2b2f3a"></circle>
+      <circle cx="61.5" cy="55" r="2" fill="#fff"></circle>
+      <circle cx="91.5" cy="55" r="2" fill="#fff"></circle>
+    </svg>
+  </button>
+
+  <!-- Уточка — ми -->
+  <button class="key" type="button" data-note="2" style="--halo: rgba(255, 210, 74, 0.55)"
+          aria-label="Уточка, нота ми">
+    <span class="halo" aria-hidden="true"></span>
+    <svg viewBox="0 0 140 150" preserveAspectRatio="xMidYMax meet" aria-hidden="true" focusable="false">
+      <ellipse cx="70" cy="112" rx="42" ry="33" fill="#ffd24a"></ellipse>
+      <ellipse cx="70" cy="121" rx="26" ry="22" fill="#ffeaa0"></ellipse>
+      <ellipse cx="50" cy="141" rx="15" ry="8" fill="#ffb84d"></ellipse>
+      <ellipse cx="90" cy="141" rx="15" ry="8" fill="#ffb84d"></ellipse>
+      <circle cx="70" cy="62" r="35" fill="#ffd24a"></circle>
+      <path d="M70 66 q22 0 22 11 q0 9 -22 9 q-22 0 -22 -9 q0 -11 22 -11z" fill="#ff9f43"></path>
+      <circle cx="57" cy="52" r="6" fill="#2b2f3a"></circle>
+      <circle cx="83" cy="52" r="6" fill="#2b2f3a"></circle>
+      <circle cx="59" cy="49" r="2.2" fill="#fff"></circle>
+      <circle cx="85" cy="49" r="2.2" fill="#fff"></circle>
+    </svg>
+  </button>
+
+  <!-- Зайка — соль -->
+  <button class="key" type="button" data-note="3" style="--halo: rgba(255, 194, 209, 0.6)"
+          aria-label="Зайка, нота соль">
+    <span class="halo" aria-hidden="true"></span>
+    <svg viewBox="0 0 140 150" preserveAspectRatio="xMidYMax meet" aria-hidden="true" focusable="false">
+      <ellipse cx="48" cy="36" rx="12" ry="30" transform="rotate(-8 48 36)" fill="#f2ece6"></ellipse>
+      <ellipse cx="92" cy="36" rx="12" ry="30" transform="rotate(8 92 36)" fill="#f2ece6"></ellipse>
+      <ellipse cx="48" cy="38" rx="6" ry="20" transform="rotate(-8 48 38)" fill="#ffc2d1"></ellipse>
+      <ellipse cx="92" cy="38" rx="6" ry="20" transform="rotate(8 92 38)" fill="#ffc2d1"></ellipse>
+      <ellipse cx="70" cy="112" rx="40" ry="33" fill="#f2ece6"></ellipse>
+      <ellipse cx="70" cy="121" rx="24" ry="22" fill="#fff"></ellipse>
+      <ellipse cx="50" cy="141" rx="14" ry="8" fill="#e6ded6"></ellipse>
+      <ellipse cx="90" cy="141" rx="14" ry="8" fill="#e6ded6"></ellipse>
+      <circle cx="70" cy="74" r="34" fill="#f2ece6"></circle>
+      <ellipse cx="57" cy="70" rx="5.5" ry="7" fill="#2b2f3a"></ellipse>
+      <ellipse cx="83" cy="70" rx="5.5" ry="7" fill="#2b2f3a"></ellipse>
+      <circle cx="59" cy="67" r="1.8" fill="#fff"></circle>
+      <circle cx="85" cy="67" r="1.8" fill="#fff"></circle>
+      <path d="M65 86 H75 L70 92 Z" fill="#ff9db5"></path>
+      <path d="M70 92 v4 M70 96 q-5 3 -8 0 M70 96 q5 3 8 0"
+            fill="none" stroke="#c96a35" stroke-width="2" stroke-linecap="round"></path>
+    </svg>
+  </button>
+
+  <!-- Лягушка — ля -->
+  <button class="key" type="button" data-note="4" style="--halo: rgba(111, 211, 111, 0.55)"
+          aria-label="Лягушка, нота ля">
+    <span class="halo" aria-hidden="true"></span>
+    <svg viewBox="0 0 140 150" preserveAspectRatio="xMidYMax meet" aria-hidden="true" focusable="false">
+      <ellipse cx="70" cy="112" rx="42" ry="32" fill="#6fd36f"></ellipse>
+      <ellipse cx="70" cy="121" rx="26" ry="22" fill="#d8f5c8"></ellipse>
+      <ellipse cx="50" cy="141" rx="15" ry="8" fill="#57b85a"></ellipse>
+      <ellipse cx="90" cy="141" rx="15" ry="8" fill="#57b85a"></ellipse>
+      <circle cx="50" cy="44" r="16" fill="#6fd36f"></circle>
+      <circle cx="90" cy="44" r="16" fill="#6fd36f"></circle>
+      <circle cx="70" cy="74" r="34" fill="#6fd36f"></circle>
+      <circle cx="50" cy="44" r="8" fill="#fff"></circle>
+      <circle cx="90" cy="44" r="8" fill="#fff"></circle>
+      <circle cx="50" cy="44" r="4" fill="#2b2f3a"></circle>
+      <circle cx="90" cy="44" r="4" fill="#2b2f3a"></circle>
+      <path d="M46 82 q24 18 48 0" fill="none" stroke="#3f9b4a"
+            stroke-width="4" stroke-linecap="round"></path>
+    </svg>
+  </button>
+
+</main>
+
 <div class="bubbles" id="bubbles" aria-hidden="true"></div>
 
 <div class="sky-tap" id="sky-tap" aria-hidden="true"></div>
@@ -769,6 +995,7 @@
         <button class="btn" type="button" data-mode="bubbles">Пузыри</button>
         <button class="btn" type="button" data-mode="sky">Небо</button>
         <button class="btn" type="button" data-mode="draw">Рисование</button>
+        <button class="btn" type="button" data-mode="music">Музыка</button>
       </div>
     </div>
 
@@ -825,7 +1052,7 @@
     if (saved && typeof saved.minutes === "number") {
       settings.minutes = saved.minutes;
     }
-    if (saved && (saved.mode === "bubbles" || saved.mode === "animals" || saved.mode === "sky" || saved.mode === "draw")) {
+    if (saved && (saved.mode === "bubbles" || saved.mode === "animals" || saved.mode === "sky" || saved.mode === "draw" || saved.mode === "music")) {
       settings.mode = saved.mode;
     }
     if (saved && typeof saved.sky === "number" && saved.sky >= 0 && saved.sky < 5) {
@@ -1353,7 +1580,73 @@
     drawCtx.clearRect(0, 0, drawLayer.width, drawLayer.height);
   }
 
-  /* ---------- 6. Сколько можно играть ---------- */
+  /* ---------- 6. Музыкальные звери ---------- */
+
+  var musicStage = document.getElementById("music");
+  // пентатоника: до, ре, ми, соль, ля — любое сочетание звучит приятно
+  var NOTES = [261.63, 293.66, 329.63, 392.0, 440.0];
+
+  function playNote(index) {
+    if (!settings.sound) {
+      return;
+    }
+    try {
+      var ctx = audioContext();
+      var hz = NOTES[index];
+      if (!ctx || !hz) {
+        return;
+      }
+      var t = ctx.currentTime;
+
+      // основной тон и тихая октава сверху — мягко и «по-настоящему»
+      [[1, "sine", 0.18], [2, "triangle", 0.045]].forEach(function (voice) {
+        var osc = ctx.createOscillator();
+        var gain = ctx.createGain();
+
+        osc.type = voice[1];
+        osc.frequency.value = hz * voice[0];
+
+        gain.gain.setValueAtTime(0.0001, t);
+        gain.gain.exponentialRampToValueAtTime(voice[2], t + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.9);
+
+        osc.connect(gain);
+        gain.connect(master);
+        osc.start(t);
+        osc.stop(t + 1);
+      });
+    } catch (error) {
+      // без звука — просто играем дальше
+    }
+  }
+
+  function hitKey(key) {
+    key.classList.remove("hit");
+    void key.offsetWidth;
+    key.classList.add("hit");
+    window.setTimeout(function () {
+      key.classList.remove("hit");
+    }, 600);
+  }
+
+  musicStage.addEventListener("pointerdown", function (event) {
+    if (paused || sleeping) {
+      return;
+    }
+    var key = event.target.closest ? event.target.closest(".key") : null;
+    if (!key) {
+      return;
+    }
+    if (!started) {
+      started = true;
+      warmUp();
+      startSession();
+    }
+    playNote(Number(key.getAttribute("data-note")));
+    hitKey(key);
+  });
+
+  /* ---------- 7. Сколько можно играть ---------- */
 
   var sessionStart = 0;
   var limitTimer = null;
@@ -1395,14 +1688,14 @@
     startSession();
   }
 
-  /* ---------- 7. Первое касание: готовим экран ---------- */
+  /* ---------- 8. Первое касание: готовим экран ---------- */
 
   function warmUp() {
     keepScreenAwake();
     goFullScreen();
   }
 
-  /* ---------- 8. Экран не гаснет, пока идёт игра ---------- */
+  /* ---------- 9. Экран не гаснет, пока идёт игра ---------- */
 
   function keepScreenAwake() {
     if (!("wakeLock" in navigator) || document.visibilityState !== "visible") {
@@ -1419,7 +1712,7 @@
     }
   });
 
-  /* ---------- 9. Полный экран ---------- */
+  /* ---------- 10. Полный экран ---------- */
 
   var isTouchDevice = window.matchMedia("(pointer: coarse)").matches;
 
@@ -1435,7 +1728,7 @@
     root.requestFullscreen({ navigationUI: "hide" }).catch(function () {});
   }
 
-  /* ---------- 10. Ребёнок не должен листать, приближать и выделять ---------- */
+  /* ---------- 11. Ребёнок не должен листать, приближать и выделять ---------- */
 
   function block(event) {
     event.preventDefault();
@@ -1461,7 +1754,7 @@
   document.addEventListener("gesturestart", block, { passive: false });
   document.addEventListener("gesturechange", block, { passive: false });
 
-  /* ---------- 11. Потайная дверь для взрослого ---------- */
+  /* ---------- 12. Потайная дверь для взрослого ---------- */
 
   var lock = document.getElementById("lock");
   var panel = document.getElementById("panel");
@@ -1628,7 +1921,7 @@
     byeScreen.hidden = true;
   });
 
-  /* ---------- 12. Кнопка «назад» остаётся в игре ---------- */
+  /* ---------- 13. Кнопка «назад» остаётся в игре ---------- */
 
   // показываем выбранную игру (и готовим холст, если выбрано рисование)
   applyMode();
