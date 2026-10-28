@@ -31,6 +31,8 @@ Online version: **https://zik69.github.io/nikolai-game/**
   The panel closes itself after 30 seconds.
 - **Gentle time limit.** When the time is up, a calm night screen appears and
   taps stop working. Only an adult can bring the game back.
+- **Peekaboo.** Tap a character and it vanishes with a little puff, then pops
+  back with a two-note “ku-ku”.
 - **No ads, no tracking, no accounts.** Nothing leaves the device.
 
 ## On an iPad
@@ -50,6 +52,5 @@ Sound starts on the very first tap, which is what iOS requires.
 
 ## Roadmap in one line
 
-All P0 tasks are done: safe full-screen frame, three big buttons, sounds, a
-parent lock with a gentle time limit, and a fully offline single file. Next:
-the fun part — peekaboo, bubbles, music.
+All P0 tasks are done, plus peekaboo. Next: bubbles, colours, finger drawing and
+music.
