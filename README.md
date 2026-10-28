@@ -38,6 +38,8 @@ Online version: **https://zik69.github.io/nikolai-game/**
   parent panel.
 - **Colour sky.** A third game: touch anywhere and the sky and sun fade through
   five gentle palettes with a quiet chime.
+- **Finger drawing.** A fourth game: thick, bright, multi-colour strokes follow
+  the finger; only an adult can clear the canvas.
 - **No ads, no tracking, no accounts.** Nothing leaves the device.
 
 ## On an iPad
@@ -57,5 +59,5 @@ Sound starts on the very first tap, which is what iOS requires.
 
 ## Roadmap in one line
 
-All P0 tasks are done, plus peekaboo, bubbles and the colour-changing sky.
-Next: finger drawing and music.
+All P0 tasks are done, plus peekaboo, bubbles, the colour-changing sky and
+finger drawing. Next: musical animals.

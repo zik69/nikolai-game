@@ -85,6 +85,30 @@
     display: none;
   }
 
+  /* ---------- рисование ---------- */
+
+  .draw-layer {
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+    display: none;
+    width: 100%;
+    height: 100%;
+    touch-action: none;
+  }
+
+  body[data-mode="draw"] .draw-layer {
+    display: block;
+  }
+
+  body[data-mode="draw"] .stage {
+    display: none;
+  }
+
+  body[data-mode="draw"] .bubbles {
+    display: none;
+  }
+
   .sun {
     position: absolute;
     top: 6vh;
@@ -717,6 +741,8 @@
 
 <div class="sky-tap" id="sky-tap" aria-hidden="true"></div>
 
+<canvas class="draw-layer" id="draw-layer" aria-hidden="true"></canvas>
+
 
 <button class="lock" id="lock" type="button"
         aria-label="Настройки для взрослого. Удержать три секунды">
@@ -738,12 +764,15 @@
 
     <div class="row stacked">
       <span>Что показывать</span>
-      <div class="chips" id="mode-chips">
+      <div class="chips two" id="mode-chips">
         <button class="btn" type="button" data-mode="animals">Звери</button>
         <button class="btn" type="button" data-mode="bubbles">Пузыри</button>
         <button class="btn" type="button" data-mode="sky">Небо</button>
+        <button class="btn" type="button" data-mode="draw">Рисование</button>
       </div>
     </div>
+
+    <button class="btn wide" id="clear-draw" type="button">Стереть рисунок</button>
 
     <div class="row stacked">
       <span>Время игры</span>
@@ -796,7 +825,7 @@
     if (saved && typeof saved.minutes === "number") {
       settings.minutes = saved.minutes;
     }
-    if (saved && (saved.mode === "bubbles" || saved.mode === "animals" || saved.mode === "sky")) {
+    if (saved && (saved.mode === "bubbles" || saved.mode === "animals" || saved.mode === "sky" || saved.mode === "draw")) {
       settings.mode = saved.mode;
     }
     if (saved && typeof saved.sky === "number" && saved.sky >= 0 && saved.sky < 5) {
@@ -808,9 +837,10 @@
 
   function applyMode() {
     document.body.dataset.mode = settings.mode;
+    if (settings.mode === "draw" && typeof sizeCanvas === "function") {
+      sizeCanvas();
+    }
   }
-
-  applyMode();
 
   function saveSettings() {
     try {
@@ -1224,7 +1254,106 @@
     nextSky();
   });
 
-  /* ---------- 5. Сколько можно играть ---------- */
+  /* ---------- 5. Рисование ---------- */
+
+  var drawLayer = document.getElementById("draw-layer");
+  var drawCtx = drawLayer.getContext("2d");
+  var DRAW_COLORS = ["#ff5b5b", "#ffb02e", "#4fbf6a", "#3fa9f5", "#a76bff", "#ff6ea8"];
+  var drawColorIndex = 0;
+  var drawPointers = {};
+
+  function drawWidth() {
+    return Math.max(16, Math.min(window.innerWidth, window.innerHeight) * 0.04);
+  }
+
+  function sizeCanvas() {
+    if (!drawCtx) {
+      return;
+    }
+    var rect = drawLayer.getBoundingClientRect();
+    var dpr = window.devicePixelRatio || 1;
+    var width = Math.round(rect.width * dpr);
+    var height = Math.round(rect.height * dpr);
+    if (!width || !height || (width === drawLayer.width && height === drawLayer.height)) {
+      return;
+    }
+    drawLayer.width = width;
+    drawLayer.height = height;
+    drawCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    drawCtx.lineJoin = "round";
+    drawCtx.lineCap = "round";
+  }
+
+  var resizeTimer = null;
+  window.addEventListener("resize", function () {
+    if (resizeTimer) {
+      clearTimeout(resizeTimer);
+    }
+    // при повороте экрана рисунок начинается заново — так честнее, чем растягивать
+    resizeTimer = setTimeout(sizeCanvas, 250);
+  });
+
+  function pointFrom(event) {
+    var rect = drawLayer.getBoundingClientRect();
+    return { x: event.clientX - rect.left, y: event.clientY - rect.top };
+  }
+
+  drawLayer.addEventListener("pointerdown", function (event) {
+    if (paused || sleeping) {
+      return;
+    }
+    if (!started) {
+      started = true;
+      warmUp();
+      startSession();
+    }
+    if (drawLayer.setPointerCapture) {
+      try {
+        drawLayer.setPointerCapture(event.pointerId);
+      } catch (error) {
+        // не получилось — рисуем как обычно
+      }
+    }
+
+    var point = pointFrom(event);
+    var color = DRAW_COLORS[drawColorIndex % DRAW_COLORS.length];
+    drawColorIndex++;
+    drawPointers[event.pointerId] = { x: point.x, y: point.y, color: color };
+
+    // первая точка — кружок, чтобы одиночное касание тоже оставляло след
+    drawCtx.fillStyle = color;
+    drawCtx.beginPath();
+    drawCtx.arc(point.x, point.y, drawWidth() / 2, 0, Math.PI * 2);
+    drawCtx.fill();
+  });
+
+  drawLayer.addEventListener("pointermove", function (event) {
+    var last = drawPointers[event.pointerId];
+    if (!last) {
+      return;
+    }
+    var point = pointFrom(event);
+    drawCtx.strokeStyle = last.color;
+    drawCtx.lineWidth = drawWidth();
+    drawCtx.beginPath();
+    drawCtx.moveTo(last.x, last.y);
+    drawCtx.lineTo(point.x, point.y);
+    drawCtx.stroke();
+    last.x = point.x;
+    last.y = point.y;
+  });
+
+  ["pointerup", "pointercancel"].forEach(function (name) {
+    drawLayer.addEventListener(name, function (event) {
+      delete drawPointers[event.pointerId];
+    });
+  });
+
+  function clearDrawing() {
+    drawCtx.clearRect(0, 0, drawLayer.width, drawLayer.height);
+  }
+
+  /* ---------- 6. Сколько можно играть ---------- */
 
   var sessionStart = 0;
   var limitTimer = null;
@@ -1266,14 +1395,14 @@
     startSession();
   }
 
-  /* ---------- 6. Первое касание: готовим экран ---------- */
+  /* ---------- 7. Первое касание: готовим экран ---------- */
 
   function warmUp() {
     keepScreenAwake();
     goFullScreen();
   }
 
-  /* ---------- 7. Экран не гаснет, пока идёт игра ---------- */
+  /* ---------- 8. Экран не гаснет, пока идёт игра ---------- */
 
   function keepScreenAwake() {
     if (!("wakeLock" in navigator) || document.visibilityState !== "visible") {
@@ -1290,7 +1419,7 @@
     }
   });
 
-  /* ---------- 8. Полный экран ---------- */
+  /* ---------- 9. Полный экран ---------- */
 
   var isTouchDevice = window.matchMedia("(pointer: coarse)").matches;
 
@@ -1306,7 +1435,7 @@
     root.requestFullscreen({ navigationUI: "hide" }).catch(function () {});
   }
 
-  /* ---------- 9. Ребёнок не должен листать, приближать и выделять ---------- */
+  /* ---------- 10. Ребёнок не должен листать, приближать и выделять ---------- */
 
   function block(event) {
     event.preventDefault();
@@ -1332,13 +1461,14 @@
   document.addEventListener("gesturestart", block, { passive: false });
   document.addEventListener("gesturechange", block, { passive: false });
 
-  /* ---------- 10. Потайная дверь для взрослого ---------- */
+  /* ---------- 11. Потайная дверь для взрослого ---------- */
 
   var lock = document.getElementById("lock");
   var panel = document.getElementById("panel");
   var soundToggle = document.getElementById("sound-toggle");
   var chips = document.getElementById("time-chips");
   var modeChips = document.getElementById("mode-chips");
+  var clearDraw = document.getElementById("clear-draw");
   var resumeBtn = document.getElementById("resume");
   var exitBtn = document.getElementById("exit");
   var sleepScreen = document.getElementById("sleep");
@@ -1469,6 +1599,11 @@
     restartPanelTimer();
   });
 
+  clearDraw.addEventListener("click", function () {
+    clearDrawing();
+    restartPanelTimer();
+  });
+
   resumeBtn.addEventListener("click", function () {
     closePanel();
     if (sleeping) {
@@ -1493,7 +1628,10 @@
     byeScreen.hidden = true;
   });
 
-  /* ---------- 11. Кнопка «назад» остаётся в игре ---------- */
+  /* ---------- 12. Кнопка «назад» остаётся в игре ---------- */
+
+  // показываем выбранную игру (и готовим холст, если выбрано рисование)
+  applyMode();
 
   try {
     history.pushState({ game: true }, "");
