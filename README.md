@@ -54,6 +54,8 @@ Online version: **https://zik69.github.io/nikolai-game/**
   answer with a familiar voice instead of the synth sound.
 - **Counting.** A ninth game: tap and a new ball appears — red, blue, green —
   with its own note and the number spoken out loud.
+- **Seasons.** A tenth game: a meadow with a tree that changes with the season —
+  snow, petals, sparkles or leaves.
 - **No ads, no tracking, no accounts.** Nothing leaves the device.
 - **Fullscreen button.** One tap in the parent panel hides the browser UI.
   If the browser refuses, a short card explains the two reliable ways to lock
@@ -82,5 +84,5 @@ it. For a real child lock use one of these:
 
 ## Roadmap in one line
 
-All P0 and P1 tasks are done, plus a gentle end-of-session timer, recorded parent
-voices and counting to three. Next: four seasons.
+All P0 and P1 tasks are done, plus a gentle timer, parent voices, counting,
+falling stars and four seasons. Next: a garage for the car.

@@ -616,6 +616,147 @@
     50%      { transform: scale(1.08) translateY(-6%); }
   }
 
+  /* ---------- времена года ---------- */
+
+  .year {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    display: none;
+    overflow: hidden;
+    background: linear-gradient(#a8dcff 0%, #e6f6ff 100%);
+    transition: background 0.8s ease;
+    touch-action: none;
+  }
+
+  body[data-mode="year"] .year {
+    display: block;
+  }
+
+  body[data-mode="year"] .stage,
+  body[data-mode="year"] .bubbles {
+    display: none;
+  }
+
+  .year[data-season="winter"] {
+    background: linear-gradient(#cfe3f2 0%, #eef6fc 100%);
+    --ground: #f4faff;
+    --leaf: #e8f3fb;
+    --tap: #9fc6e0;
+  }
+
+  .year[data-season="spring"] {
+    background: linear-gradient(#bfe6ff 0%, #f2fbff 100%);
+    --ground: #a8e08a;
+    --leaf: #ffb7cd;
+    --tap: #ff9ec2;
+  }
+
+  .year[data-season="summer"] {
+    background: linear-gradient(#a8dcff 0%, #e6f6ff 100%);
+    --ground: #6fce5c;
+    --leaf: #4fb356;
+    --tap: #69c46f;
+  }
+
+  .year[data-season="autumn"] {
+    background: linear-gradient(#ffd9a8 0%, #fff1df 100%);
+    --ground: #d9a35f;
+    --leaf: #e8894a;
+    --tap: #e8894a;
+  }
+
+  .year-ground {
+    position: absolute;
+    left: -10%;
+    right: -10%;
+    bottom: 0;
+    height: 34%;
+    background: var(--ground);
+    border-radius: 50% 50% 0 0 / 22% 22% 0 0;
+    transition: background 0.8s ease;
+  }
+
+  .year-tree {
+    position: absolute;
+    left: 50%;
+    bottom: 20%;
+    width: 46vmin;
+    transform: translateX(-50%);
+  }
+
+  .year-tree svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    filter: drop-shadow(0 10px 16px rgba(0, 0, 0, 0.12));
+  }
+
+  .crown {
+    fill: var(--leaf);
+    transition: fill 0.8s ease;
+  }
+
+  .weather {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  .flake {
+    position: absolute;
+    top: -10vh;
+    width: 1.2vmin;
+    height: 1.2vmin;
+    border-radius: 50%;
+    background: #fff;
+    opacity: 0.9;
+    animation: weather-fall linear infinite;
+  }
+
+  #year[data-season="spring"] .flake {
+    width: 1.5vmin;
+    height: 1.2vmin;
+    border-radius: 60% 10% 60% 10%;
+    background: #ffc2d6;
+  }
+
+  #year[data-season="summer"] .flake {
+    width: 0.9vmin;
+    height: 0.9vmin;
+    background: #fff6b8;
+    box-shadow: 0 0 1vmin rgba(255, 246, 184, 0.9);
+  }
+
+  #year[data-season="autumn"] .flake {
+    width: 1.6vmin;
+    height: 1.3vmin;
+    border-radius: 70% 10% 70% 10%;
+    background: #ef9450;
+  }
+
+  @keyframes weather-fall {
+    0%   { transform: translate3d(0, 0, 0) rotate(0deg); }
+    100% { transform: translate3d(var(--drift, 2vw), 120vh, 0) rotate(220deg); }
+  }
+
+  .year-ripple {
+    position: absolute;
+    width: 6vmin;
+    height: 6vmin;
+    margin: -3vmin 0 0 -3vmin;
+    border: 0.5vmin solid var(--tap, #69c46f);
+    border-radius: 50%;
+    pointer-events: none;
+    animation: year-ripple 0.9s ease-out forwards;
+  }
+
+  @keyframes year-ripple {
+    0%   { opacity: 0.85; transform: scale(0.3); }
+    100% { opacity: 0; transform: scale(2.2); }
+  }
+
   .sun {
     position: absolute;
     top: 6vh;
@@ -1053,6 +1194,10 @@
     gap: 8px;
   }
 
+  .row[hidden] {
+    display: none;
+  }
+
   .steps {
     padding-left: 1.3em;
     margin-bottom: 6px;
@@ -1078,7 +1223,8 @@
   }
   @media (min-width: 640px) {
     #mode-chips,
-    #voice-chips {
+    #voice-chips,
+    #season-chips {
       grid-template-columns: repeat(4, minmax(0, 1fr));
     }
 
@@ -1552,6 +1698,22 @@
   </div>
 </main>
 
+<main class="year" id="year" data-season="summer">
+  <div class="year-ground" aria-hidden="true"></div>
+
+  <div class="year-tree" aria-hidden="true">
+    <svg viewBox="0 0 200 220" focusable="false">
+      <rect x="92" y="118" width="16" height="94" rx="8" fill="#8a5a35"></rect>
+      <circle class="crown" cx="100" cy="78" r="50"></circle>
+      <circle class="crown" cx="62" cy="104" r="34"></circle>
+      <circle class="crown" cx="138" cy="104" r="34"></circle>
+      <circle class="crown" cx="100" cy="118" r="30"></circle>
+    </svg>
+  </div>
+
+  <div class="weather" id="weather" aria-hidden="true"></div>
+</main>
+
 <canvas class="draw-layer" id="draw-layer" aria-hidden="true"></canvas>
 
 <div class="curtain" id="curtain" aria-hidden="true"></div>
@@ -1586,6 +1748,7 @@
         <button class="btn" type="button" data-mode="sort">Размер</button>
         <button class="btn" type="button" data-mode="bedtime">Сон</button>
         <button class="btn" type="button" data-mode="count">Счёт</button>
+        <button class="btn" type="button" data-mode="year">Год</button>
       </div>
     </div>
 
@@ -1597,6 +1760,16 @@
         <button class="btn" type="button" data-minutes="10">10 мин</button>
         <button class="btn" type="button" data-minutes="15">15 мин</button>
         <button class="btn" type="button" data-minutes="30">30 мин</button>
+      </div>
+    </div>
+
+    <div class="row stacked" id="season-row" hidden>
+      <span>Время года</span>
+      <div class="chips two" id="season-chips">
+        <button class="btn" type="button" data-season="winter">Зима</button>
+        <button class="btn" type="button" data-season="spring">Весна</button>
+        <button class="btn" type="button" data-season="summer">Лето</button>
+        <button class="btn" type="button" data-season="autumn">Осень</button>
       </div>
     </div>
 
@@ -1664,7 +1837,7 @@
   /* ---------- 0. Настройки взрослого ---------- */
 
   var SETTINGS_KEY = "nikolai-game:settings";
-  var settings = { sound: true, minutes: 10, mode: "animals", sky: 0 };
+  var settings = { sound: true, minutes: 10, mode: "animals", sky: 0, season: "summer" };
 
   try {
     var saved = JSON.parse(localStorage.getItem(SETTINGS_KEY) || "null");
@@ -1674,11 +1847,14 @@
     if (saved && typeof saved.minutes === "number") {
       settings.minutes = saved.minutes;
     }
-    if (saved && (saved.mode === "bubbles" || saved.mode === "animals" || saved.mode === "sky" || saved.mode === "draw" || saved.mode === "music" || saved.mode === "ladushki" || saved.mode === "sort" || saved.mode === "bedtime" || saved.mode === "count")) {
+    if (saved && (saved.mode === "bubbles" || saved.mode === "animals" || saved.mode === "sky" || saved.mode === "draw" || saved.mode === "music" || saved.mode === "ladushki" || saved.mode === "sort" || saved.mode === "bedtime" || saved.mode === "count" || saved.mode === "year")) {
       settings.mode = saved.mode;
     }
     if (saved && typeof saved.sky === "number" && saved.sky >= 0 && saved.sky < 5) {
       settings.sky = saved.sky;
+    }
+    if (saved && (saved.season === "winter" || saved.season === "spring" || saved.season === "summer" || saved.season === "autumn")) {
+      settings.season = saved.season;
     }
   } catch (error) {
     // браузер не дал прочитать настройки — играем на значениях по умолчанию
@@ -1702,6 +1878,9 @@
       } else {
         stopBedtime();
       }
+    }
+    if (typeof applySeason === "function" && settings.mode === "year") {
+      applySeason();
     }
   }
 
@@ -3042,7 +3221,67 @@
     addBall();
   });
 
-  /* ---------- 12. Сколько можно играть ---------- */
+  /* ---------- 12. Времена года ---------- */
+
+  var yearArea = document.getElementById("year");
+  var weather = document.getElementById("weather");
+  var seasonChips = document.getElementById("season-chips");
+
+  function buildWeather() {
+    if (!weather) {
+      return;
+    }
+    weather.innerHTML = "";
+    for (var i = 0; i < 26; i++) {
+      var flake = document.createElement("span");
+      flake.className = "flake";
+      flake.style.left = (Math.random() * 100).toFixed(2) + "%";
+      flake.style.animationDuration = (9 + Math.random() * 8).toFixed(2) + "s";
+      flake.style.animationDelay = (-Math.random() * 12).toFixed(2) + "s";
+      flake.style.setProperty("--drift", (Math.random() * 10 - 5).toFixed(1) + "vw");
+      weather.appendChild(flake);
+    }
+  }
+
+  function applySeason() {
+    if (!yearArea) {
+      return;
+    }
+    yearArea.dataset.season = settings.season;
+    buildWeather();
+
+    if (seasonChips) {
+      Array.prototype.forEach.call(seasonChips.children, function (chip) {
+        chip.classList.toggle("active", chip.getAttribute("data-season") === settings.season);
+      });
+    }
+  }
+
+  yearArea.addEventListener("pointerdown", function (event) {
+    if (paused || sleeping) {
+      return;
+    }
+    if (!started) {
+      started = true;
+      warmUp();
+      startSession();
+    }
+
+    var ring = document.createElement("span");
+    ring.className = "year-ripple";
+    ring.style.left = event.clientX + "px";
+    ring.style.top = event.clientY + "px";
+    yearArea.appendChild(ring);
+    playSound("star");
+
+    window.setTimeout(function () {
+      if (ring.parentNode) {
+        ring.parentNode.removeChild(ring);
+      }
+    }, 950);
+  });
+
+  /* ---------- 13. Сколько можно играть ---------- */
 
   var sessionStart = 0;
   var limitTimer = null;
@@ -3116,13 +3355,13 @@
     applyMode();
   }
 
-  /* ---------- 13. Первое касание: готовим экран ---------- */
+  /* ---------- 14. Первое касание: готовим экран ---------- */
 
   function warmUp() {
     keepScreenAwake();
   }
 
-  /* ---------- 14. Экран не гаснет, пока идёт игра ---------- */
+  /* ---------- 15. Экран не гаснет, пока идёт игра ---------- */
 
   function keepScreenAwake() {
     if (!("wakeLock" in navigator) || document.visibilityState !== "visible") {
@@ -3139,7 +3378,7 @@
     }
   });
 
-  /* ---------- 15. Полный экран ---------- */
+  /* ---------- 16. Полный экран ---------- */
 
   var fsButton = document.getElementById("fullscreen");
   var fsHint = document.getElementById("fs-hint");
@@ -3229,7 +3468,7 @@
   document.addEventListener("fullscreenchange", refreshFullscreenLabel);
   document.addEventListener("webkitfullscreenchange", refreshFullscreenLabel);
 
-  /* ---------- 16. Ребёнок не должен листать, приближать и выделять ---------- */
+  /* ---------- 17. Ребёнок не должен листать, приближать и выделять ---------- */
 
   function block(event) {
     event.preventDefault();
@@ -3255,13 +3494,14 @@
   document.addEventListener("gesturestart", block, { passive: false });
   document.addEventListener("gesturechange", block, { passive: false });
 
-  /* ---------- 17. Потайная дверь для взрослого ---------- */
+  /* ---------- 18. Потайная дверь для взрослого ---------- */
 
   var lock = document.getElementById("lock");
   var panel = document.getElementById("panel");
   var soundToggle = document.getElementById("sound-toggle");
   var chips = document.getElementById("time-chips");
   var modeChips = document.getElementById("mode-chips");
+  var seasonRow = document.getElementById("season-row");
   var clearDraw = document.getElementById("clear-draw");
   var resumeBtn = document.getElementById("resume");
   var exitBtn = document.getElementById("exit");
@@ -3317,6 +3557,10 @@
     Array.prototype.forEach.call(modeChips.children, function (chip) {
       chip.classList.toggle("active", chip.getAttribute("data-mode") === settings.mode);
     });
+
+    if (seasonRow) {
+      seasonRow.hidden = settings.mode !== "year";
+    }
 
     exitBtn.textContent = "Выйти из игры";
     exitBtn.classList.remove("danger");
@@ -3395,6 +3639,19 @@
     restartPanelTimer();
   });
 
+  if (seasonChips) {
+    seasonChips.addEventListener("click", function (event) {
+      var chip = event.target.closest ? event.target.closest("[data-season]") : null;
+      if (!chip) {
+        return;
+      }
+      settings.season = chip.getAttribute("data-season");
+      saveSettings();
+      applySeason();
+      restartPanelTimer();
+    });
+  }
+
   clearDraw.addEventListener("click", function () {
     clearDrawing();
     restartPanelTimer();
@@ -3424,7 +3681,7 @@
     byeScreen.hidden = true;
   });
 
-  /* ---------- 18. Кнопка «назад» остаётся в игре ---------- */
+  /* ---------- 19. Кнопка «назад» остаётся в игре ---------- */
 
   // показываем выбранную игру (и готовим холст, если выбрано рисование)
   applyMode();
